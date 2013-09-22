@@ -1,15 +1,15 @@
 // Be the first to press your button when the song ends!
 const int yellow       = 13;
-const int red          = 3;
-const int piezo        = 9;
-const int redButton    = 2;
 const int yellowButton = 12;
+const int piezo        = 11;
+const int red          = 10;
+const int redButton    = 9;
 
 bool song() {
 	const int A        = 440;
 	const int E        = 659;
-	const int duration = 500;
-	bool over          = false;
+	const int duration = 250;
+	bool playing       = true;
 	unsigned long currentMillis = millis();
 	if      (currentMillis < duration * 1) tone(piezo, A);
 	else if (currentMillis < duration * 2) noTone(piezo);
@@ -18,9 +18,9 @@ bool song() {
 	else if (currentMillis < duration * 5) tone(piezo, E);
 	else {
 		noTone(piezo);
-		over = true;
+		playing = false;
 	}
-	return over;
+	return playing;
 }
 
 bool pressedFirst(int pin) {
@@ -40,7 +40,7 @@ void setup() {
 }
 
 void loop() {
-	if(song()) {
+	if(!song()) {
 		if (pressedFirst(redButton)) digitalWrite(red, HIGH);
 		if (pressedFirst(yellowButton)) digitalWrite(yellow, HIGH);
 	}
