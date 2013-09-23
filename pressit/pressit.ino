@@ -1,9 +1,12 @@
 // Be the first to press your button when the song ends!
+#include "pressit.h"
 const int yellow       = 13;
 const int yellowButton = 12;
 const int piezo        = 11;
 const int red          = 10;
 const int redButton    = 9;
+Button* yb;
+Button* rb;
 
 bool song() {
 	const int A        = 440;
@@ -23,25 +26,28 @@ bool song() {
 	return playing;
 }
 
-bool pressedFirst(int pin) {
-	static bool pressed = false;
-	bool first = true;
-	if(digitalRead(pin) == 0 && !pressed) pressed = true;
-	else first = false;
-	return first;
-}
-
 void setup() {
 	pinMode(yellow, OUTPUT);
 	pinMode(red, OUTPUT);
 	pinMode(piezo, OUTPUT);
-	pinMode(redButton, INPUT);
-	pinMode(yellowButton, INPUT);
+	yb = new Button(yellowButton);
+	rb = new Button(redButton);
+}
+
+void winner(int ledPin) {
+	digitalWrite(ledPin, HIGH);
 }
 
 void loop() {
-	if(!song()) {
-		if (pressedFirst(redButton)) digitalWrite(red, HIGH);
-		if (pressedFirst(yellowButton)) digitalWrite(yellow, HIGH);
+	static bool over = false;
+	if(!song() && !over) {
+		if (rb->wasPressed()) {
+			winner(red);
+			over = true;
+		}
+		if (yb->wasPressed()) {
+			winner(yellow);
+			over = true;
+		}
 	}
 }
