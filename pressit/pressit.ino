@@ -1,15 +1,16 @@
 // Be the first to press your button when the song ends!
 #include "round.h"
 
-Pin* yellow          = new Pin(13, OUTPUT);
-Pin* yellowButtonPin = new Pin(12, INPUT);
-Pin* piezo           = new Pin(11, OUTPUT);
-Pin* red             = new Pin(10, OUTPUT);
-Pin* redButtonPin    = new Pin(9, INPUT);
-const int roundCount       = 1;
+Pin* yellow;
+Pin* piezo;
+Pin* red;
+Button* yellowButton;
+Button* redButton;
+const int roundCount = 3;
 Round* rounds[roundCount];
 
 bool song() {
+	return false;
 	const int A        = 440;
 	const int E        = 659;
 	const int duration = 250;
@@ -28,16 +29,18 @@ bool song() {
 }
 
 void setup() {
-	Serial.begin(9600);
-        Button* yellowButton = new Button(yellowButtonPin);
-        Button* redButton    = new Button(redButtonPin);
-	for(int i = 0; i++; i < roundCount) {
-		rounds[i] = new Round(redButton, yellowButton);
-	}
-}
+	Pin* redButtonPin    = new Pin( 9, INPUT);
+	red                  = new Pin(10, OUTPUT);
+	piezo                = new Pin(11, OUTPUT);
+	Pin* yellowButtonPin = new Pin(12, INPUT);
+	yellow               = new Pin(13, OUTPUT);
+        yellowButton         = new Button(yellowButtonPin);
+        redButton            = new Button(redButtonPin);
+	int i = 0;
+	while(i < roundCount)
+		rounds[i++] = new Round(redButton, yellowButton);
 
-void winner(Pin* ledPin) {
-	ledPin->digitalWrite(HIGH);
+	Serial.begin(9600);
 }
 
 int redWins() {
@@ -48,10 +51,14 @@ int redWins() {
 	return wins;
 }
 
+void winner(Pin* ledPin) {
+	ledPin->digitalWrite(HIGH);
+}
+
 void loop() {
 	static bool gameOver   = false;
-	static int roundNumber = 0;
-	Round* round           = rounds[roundNumber];
+	static int roundNumber = 1;
+	Round* round           = rounds[roundNumber - 1];
 
 	if(round->tick() && !gameOver) {
 		Serial.print("round ");

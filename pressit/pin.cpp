@@ -2,7 +2,7 @@
 #include "Arduino.h"
 
 Pin::Pin(int num, int mode) {
-	num = num;
+	this->num = num;
 	pinMode(num, mode);
 }
 
