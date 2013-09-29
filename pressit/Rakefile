@@ -1,0 +1,7 @@
+task :test do
+  command = 'c++ -g -O0 -I. button.cpp round_test.cc && ./a.out'
+  puts command
+  system command
+end
+
+task default: :test

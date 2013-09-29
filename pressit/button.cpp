@@ -18,5 +18,5 @@ bool Button::wasPressed() {
 }
 
 bool Button::isPressed() {
-	return pin->read() == 0;
+	return pin->digitalRead() == 0;
 }

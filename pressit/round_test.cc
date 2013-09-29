@@ -1,12 +1,7 @@
 #include <iostream>
 #include <string>
 #include "round.h"
-Pin::Pin(int p, int m) { }
-
-int
-Pin::read() {
-	return 1;
-}
+#include "test_pin.h"
 
 class MockPin : public Pin {
 public:
@@ -14,7 +9,7 @@ public:
 	void setNextRead(int nextRead) {
 		this->nextRead = nextRead;
 	}
-	int read() {
+	int digitalRead() {
 		return nextRead;
 	}
 private:
@@ -50,11 +45,6 @@ int main(int argc, char** argv) {
 	redPin->setNextRead(true);
 	round->tick();
 	assert(!round->redWon(), "the round has already been decided");
-	delete round;
-	delete red;
-	delete yellow;
-	delete redPin;
-	delete yellowPin;
 	std::cout << '\n';
 	return exitStatus;
 }
