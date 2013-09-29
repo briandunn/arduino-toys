@@ -1,7 +1,7 @@
 class Pin {
 public:
 	Pin(int, int);
-	int read();
+	virtual int read();
 private:
 	int num;
 };

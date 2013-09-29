@@ -1,6 +1,7 @@
 #include "button.h"
+#include <iostream>
 Button::Button(Pin* pin) {
-	pin = pin;
+	this->pin = pin;
 	wasUp = false;
 }
 
