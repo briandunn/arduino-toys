@@ -1,10 +1,7 @@
-#include "pin.h"
+#ifndef button_h
+#define button_h
 class Button {
 public:
-	Button(Pin*);
-	bool wasPressed();
-	bool isPressed();
-private:
-	Pin* pin;
-	bool wasUp;
+	virtual bool wasPressed() = 0;
 };
+#endif

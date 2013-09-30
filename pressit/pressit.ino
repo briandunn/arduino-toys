@@ -1,11 +1,11 @@
 // Be the first to press your button when the song ends!
 #include "round.h"
+#include "pin.h"
+#include "interrupt_button.h"
 
 Pin* yellow;
 Pin* piezo;
 Pin* red;
-Button* yellowButton;
-Button* redButton;
 const int roundCount = 3;
 Round* rounds[roundCount];
 
@@ -29,13 +29,11 @@ bool song() {
 }
 
 void setup() {
-	Pin* redButtonPin    = new Pin( 9, INPUT);
 	red                  = new Pin(10, OUTPUT);
 	piezo                = new Pin(11, OUTPUT);
-	Pin* yellowButtonPin = new Pin(12, INPUT);
 	yellow               = new Pin(13, OUTPUT);
-        yellowButton         = new Button(yellowButtonPin);
-        redButton            = new Button(redButtonPin);
+	Button* redButton    = new InterruptButton(0);
+	Button* yellowButton = new InterruptButton(1);
 	int i = 0;
 	while(i < roundCount)
 		rounds[i++] = new Round(redButton, yellowButton);
