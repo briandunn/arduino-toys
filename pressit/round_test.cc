@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "round.h"
+#include "poll_button.h"
 #include "test_pin.h"
 
 class MockPin : public Pin {
@@ -30,8 +31,8 @@ void assert(bool test, std::string message) {
 int main(int argc, char** argv) {
 	MockPin* redPin    = new MockPin();
 	MockPin* yellowPin = new MockPin();
-	Button* red        = new Button(redPin);
-	Button* yellow     = new Button(yellowPin);
+	Button* red        = new PollButton(redPin);
+	Button* yellow     = new PollButton(yellowPin);
 	Round* round       = new Round(red, yellow);
 
 	redPin->setNextRead(1);

@@ -1,7 +1,9 @@
-task :test do
-  command = 'c++ -g -O0 -I. button.cpp round_test.cc && ./a.out'
-  puts command
-  system command
+namespace :test do
+  task :round do
+    command = 'c++ -g -O0 -I. poll_button.cpp round_test.cc && ./a.out'
+    puts command
+    system command
+  end
 end
 
-task default: :test
+task default: 'test:round'
