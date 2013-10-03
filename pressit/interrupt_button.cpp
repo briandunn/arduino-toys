@@ -42,11 +42,9 @@ void
 InterruptButton::change0() {
 	if(changed(digitalRead(2)))
 		changes[0] ++;
-	Serial.println(changes[0]);
 }
 void
 InterruptButton::change1() {
 	if(changed(digitalRead(3)))
 		changes[1] ++;
-	Serial.println(changes[1]);
 }

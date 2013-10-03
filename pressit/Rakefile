@@ -1,12 +1,4 @@
 namespace :test do
-  file 'poll_button.o' do
-    sh "c++ poll_button.cpp -c"
-  end
-
-  file 'round_test.o' do
-    sh "c++ -c round_test.cc -I../gtest/include"
-  end
-
   file 'gtest-all.o' do
     sh "c++ -I../gtest -I../gtest/include -c ../gtest/src/gtest-all.cc"
   end
@@ -19,17 +11,33 @@ namespace :test do
     sh "ar -rv #{t.name} #{t.prerequisites.join ' '}"
   end
 
-  file round_test: %w[round_test.o poll_button.o gtest_main.a] do |t|
+  file 'poll_button.o' do
+    sh "c++ -c poll_button.cpp"
+  end
+
+  file 'round_test.o' do
+    sh "c++ -c -I. test/round_test.cc -I../gtest/include"
+  end
+
+  file 'interrupt_button.o' do
+    sh "c++ -c -Itest interrupt_button.cpp"
+  end
+
+  file 'interrupt_button_test.o' do
+    sh "c++ -c -I. -Itest test/interrupt_button_test.cc -I../gtest/include"
+  end
+
+  file 'test/test' => %w[round_test.o interrupt_button_test.o interrupt_button.o poll_button.o gtest_main.a] do |t|
     sh "c++ -o #{t.name} #{t.prerequisites.join ' '}"
   end
 
-  task round: :round_test do |t|
+  task all: "test/test" do |t|
     sh "./#{t.prerequisites.first}"
   end
 
   task :clean do
-    sh "rm *.o *.a round_test"
+    sh "rm *.o *.a test/test"
   end
 end
 
-task default: ['test:round']
+task default: 'test:all'
