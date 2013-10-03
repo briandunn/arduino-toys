@@ -1,9 +1,35 @@
 namespace :test do
-  task :round do
-    command = 'c++ -g -O0 -I. poll_button.cpp round_test.cc && ./a.out'
-    puts command
-    system command
+  file 'poll_button.o' do
+    sh "c++ poll_button.cpp -c"
+  end
+
+  file 'round_test.o' do
+    sh "c++ -c round_test.cc -I../gtest/include"
+  end
+
+  file 'gtest-all.o' do
+    sh "c++ -I../gtest -I../gtest/include -c ../gtest/src/gtest-all.cc"
+  end
+
+  file 'gtest_main.o' do
+    sh "c++ -I../gtest -I../gtest/include -c ../gtest/src/gtest_main.cc"
+  end
+
+  file 'gtest_main.a' => %w[gtest-all.o gtest_main.o] do |t|
+    sh "ar -rv #{t.name} #{t.prerequisites.join ' '}"
+  end
+
+  file round_test: %w[round_test.o poll_button.o gtest_main.a] do |t|
+    sh "c++ -o #{t.name} #{t.prerequisites.join ' '}"
+  end
+
+  task round: :round_test do |t|
+    sh "./#{t.prerequisites.first}"
+  end
+
+  task :clean do
+    sh "rm *.o *.a round_test"
   end
 end
 
-task default: 'test:round'
+task default: ['test:round']

@@ -1,8 +1,7 @@
-#include <iostream>
-#include <string>
 #include "round.h"
 #include "poll_button.h"
 #include "test_pin.h"
+#include "gtest/gtest.h"
 
 class MockPin : public Pin {
 public:
@@ -17,18 +16,7 @@ private:
 	int nextRead;
 };
 
-int exitStatus = 0;
-
-void assert(bool test, std::string message) {
-	if(!test) {
-		std::cerr << message << "\n";
-		exitStatus = 1;
-	}
-	else
-		std::cout << '.';
-}
-
-int main(int argc, char** argv) {
+TEST(RoundTest, Works) {
 	MockPin* redPin    = new MockPin();
 	MockPin* yellowPin = new MockPin();
 	Button* red        = new PollButton(redPin);
@@ -40,12 +28,10 @@ int main(int argc, char** argv) {
 	round->tick();
 	yellowPin->setNextRead(0);
 	round->tick();
-	assert(!round->redWon(), "yellow should've been the winner");
-	assert(round->over(), "the round should be over");
+	EXPECT_FALSE(round->redWon());
+	EXPECT_TRUE(round->over());
 
 	redPin->setNextRead(true);
 	round->tick();
-	assert(!round->redWon(), "the round has already been decided");
-	std::cout << '\n';
-	return exitStatus;
+	EXPECT_FALSE(round->redWon());
 }
