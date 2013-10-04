@@ -6,7 +6,7 @@ class InterruptButton : public Button {
 		bool wasPressed();
 	private:
 		int reportedChanges;
-		int interuptNumber;
+		int interruptNumber;
 		static volatile int changes[2];
 		static void change0();
 		static void change1();

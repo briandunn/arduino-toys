@@ -5,7 +5,7 @@ InterruptButton::changes[] = {0, 0};
 
 InterruptButton::InterruptButton(int num) {
 	reportedChanges = 0;
-	interuptNumber = num;
+	interruptNumber = num;
 	changes[num] = reportedChanges;
 	attachInterrupt(num, num == 0 ? change0 : change1, CHANGE);
 }
@@ -22,7 +22,7 @@ InterruptButton::InterruptButton(int num) {
 bool
 InterruptButton::wasPressed() {
 	bool unreportedChanges = false;
-	if(changes[interuptNumber] > reportedChanges) {
+	if(changes[interruptNumber] > reportedChanges) {
 		unreportedChanges = true;
 		reportedChanges++;
 	}
