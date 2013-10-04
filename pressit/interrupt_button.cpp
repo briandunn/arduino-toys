@@ -10,22 +10,15 @@ InterruptButton::InterruptButton(int num) {
 	attachInterrupt(num, num == 0 ? change0 : change1, CHANGE);
 }
 
-/* the button has been pressed since the last time we asked */
- /* if the button starts down, the changes sequence will be something like */
- /* 0 ^ 1 v 2 ^ 3 v 4 */
- /* if the button starts up, it looks like */
- /*     1 v 2 ^ 3 v 4 */
-
- /* so every even number represents the button in the downward position. */
- /* so the answer to wasPressed: does the difference between the reported Changes and the changes span any even numbers? */
+bool isDown(int changeNumber) { return changeNumber % 2 == 0; }
 
 bool
 InterruptButton::wasPressed() {
-	bool unreportedChanges = false;
-	if(changes[interruptNumber] > reportedChanges) {
-		unreportedChanges = true;
-		reportedChanges++;
-	}
+	int changeCount = changes[interruptNumber];
+	bool unreportedChanges = isDown(changeCount) && changeCount > reportedChanges;
+
+	if(unreportedChanges)
+		reportedChanges += 2;
 	return unreportedChanges;
 }
 
