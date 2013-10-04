@@ -1,33 +1,32 @@
 namespace :test do
-  file 'gtest-all.o' => '../gtest/src/gtest-all.cc' do |t|
-    sh "c++ -I../gtest -I../gtest/include -c #{t.prerequisites.first}"
+  gtest_sources = %w[gtest-all gtest_main]
+  test_sources  = %w[round_test interrupt_button_test]
+  sources       = %w[interrupt_button poll_button]
+  dot_o         = ->(file) {"#{file}.o"}
+
+  for source in gtest_sources
+    file dot_o[source] => "../gtest/src/#{source}.cc" do |t|
+      sh "c++ -I../gtest -I../gtest/include -c #{t.prerequisites.first}"
+    end
   end
 
-  file 'gtest_main.o' => '../gtest/src/gtest_main.cc' do |t|
-    sh "c++ -I../gtest -I../gtest/include -c #{t.prerequisites.first}"
-  end
-
-  file 'gtest_main.a' => %w[gtest-all.o gtest_main.o] do |t|
+  file 'gtest_main.a' => gtest_sources.map(&dot_o) do |t|
     sh "ar -rv #{t.name} #{t.prerequisites.join ' '}"
   end
 
-  file 'poll_button.o' => 'poll_button.cpp' do |t|
-    sh "c++ -c #{t.prerequisites.first}"
+  for source in test_sources
+    file dot_o[source] => "test/#{source}.cc" do |t|
+      sh "c++ -c -I. -Itest -I../gtest/include #{t.prerequisites.first}"
+    end
   end
 
-  file 'interrupt_button.o' => 'interrupt_button.cpp' do |t|
-    sh "c++ -c -Itest #{t.prerequisites.first}"
+  for source in sources
+    file dot_o[source] => "#{source}.cpp" do |t|
+      sh "c++ -c -Itest #{t.prerequisites.first}"
+    end
   end
 
-  file 'round_test.o' => 'test/round_test.cc' do |t|
-    sh "c++ -c -I. -Itest -I../gtest/include #{t.prerequisites.first}"
-  end
-
-  file 'interrupt_button_test.o' => 'test/interrupt_button_test.cc' do |t|
-    sh "c++ -c -I. -Itest -I../gtest/include #{t.prerequisites.first}"
-  end
-
-  file 'test/test' => %w[round_test.o interrupt_button_test.o interrupt_button.o poll_button.o gtest_main.a] do |t|
+  file 'test/test' => (sources + test_sources).map(&dot_o) + %w[gtest_main.a] do |t|
     sh "c++ -o #{t.name} #{t.prerequisites.join ' '}"
   end
 
