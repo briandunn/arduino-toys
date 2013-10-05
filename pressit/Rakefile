@@ -1,8 +1,9 @@
+dot_o = ->(file) {"#{file.to_s.gsub /\..*$/, '' }.o"}
+
 namespace :test do
   gtest_sources = %w[gtest-all gtest_main]
   test_sources  = %w[round_test interrupt_button_test]
   sources       = %w[interrupt_button poll_button]
-  dot_o         = ->(file) {"#{file}.o"}
 
   for source in gtest_sources
     file dot_o[source] => "../gtest/src/#{source}.cc" do |t|
@@ -39,4 +40,49 @@ namespace :test do
   end
 end
 
-task default: 'test:all'
+task test: 'test:all'
+
+CXX_FLAGS = '-g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=atmega328p -DF_CPU=16000000L -MMD -DUSB_VID=null -DUSB_PID=null -DARDUINO=105 -I/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/cores/arduino -I/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/variants/standard'
+
+sources = %w[pressit.cpp pin.cpp interrupt_button.cpp]
+for source in sources
+  file dot_o[source] => source do |t|
+    sh "avr-gcc #{CXX_FLAGS} -c #{t.prerequisites.first}"
+  end
+end
+
+core_path = Pathname '/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/cores/arduino'
+core_sources = %w[WInterrupts.c wiring.c wiring_analog.c wiring_digital.c
+    wiring_pulse.c wiring_shift.c CDC.cpp HardwareSerial.cpp HID.cpp
+    IPAddress.cpp main.cpp new.cpp Print.cpp Stream.cpp Tone.cpp USBCore.cpp
+    WMath.cpp WString.cpp avr-libc/malloc.c avr-libc/realloc.c].map { |file| core_path.join(file) }
+
+for core_source in core_sources
+  file dot_o[core_source.basename] => core_source do |t|
+    sh "avr-gcc #{CXX_FLAGS} -c #{t.prerequisites.first}"
+  end
+end
+
+file 'core.a' => core_sources.map {|source| dot_o[source.basename] } do |t|
+  sh "avr-ar rcs #{t.name} #{ t.prerequisites.join ' ' }"
+end
+
+file 'pressit.elf' => sources.map(&dot_o) + %w[core.a] do |t|
+  sh "avr-gcc -Os -Wl,--gc-sections -L. -lm -mmcu=atmega328p -o #{t.name} #{t.prerequisites.join ' '}"
+end
+
+file 'pressit.hex' => 'pressit.elf' do |t|
+  sh "avr-objcopy -O ihex -R .eeprom #{t.prerequisites.first} #{t.name}"
+end
+
+task build: 'pressit.hex'
+task default: :build
+
+task upload: :build do |t|
+  port = Dir['/dev/tty.usbmodem*'].first or raise "plug the arduino in!"
+  sh "avrdude -v -v -pm328p -carduino -P #{port} -U flash:w:#{t.prerequisites.first}:i"
+end
+
+task :clean do
+  sh "rm *.o *.d *.a *.hex *.elf"
+end
