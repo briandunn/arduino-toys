@@ -1,42 +1,44 @@
 dot_o = ->(file) {"#{file.to_s.gsub /\..*$/, '' }.o"}
 
 namespace :test do
-  gtest_sources = %w[gtest-all gtest_main]
-  test_sources  = %w[round_test interrupt_button_test]
-  sources       = %w[interrupt_button poll_button]
+  build_path = Pathname 'test'
+  gtest_sources = %w[gtest-all.cc gtest_main.cc]
+  test_sources  = %w[round_test.cc interrupt_button_test.cc]
+  sources       = %w[interrupt_button.cpp poll_button.cpp]
 
   for source in gtest_sources
-    file dot_o[source] => "../gtest/src/#{source}.cc" do |t|
-      sh "c++ -I../gtest -I../gtest/include -c #{t.prerequisites.first}"
+    file build_path.join(dot_o[source]) => "../gtest/src/#{source}" do |t|
+      sh "c++ -c -I../gtest -I../gtest/include #{t.prerequisites.first} -o #{t.name}"
     end
   end
 
-  file 'gtest_main.a' => gtest_sources.map(&dot_o) do |t|
+  file build_path.join('gtest_main.a') => gtest_sources.map {|source| build_path.join dot_o[source] } do |t|
     sh "ar -rv #{t.name} #{t.prerequisites.join ' '}"
   end
 
   for source in test_sources
-    file dot_o[source] => "test/#{source}.cc" do |t|
-      sh "c++ -c -I. -Itest -I../gtest/include #{t.prerequisites.first}"
+    file build_path.join(dot_o[source]) => "test/#{source}" do |t|
+      sh "c++ -c -I. -Itest -I../gtest/include #{t.prerequisites.first} -o #{t.name}"
     end
   end
 
   for source in sources
-    file dot_o[source] => "#{source}.cpp" do |t|
-      sh "c++ -c -Itest #{t.prerequisites.first}"
+    file build_path.join(dot_o[source]) => source do |t|
+      sh "c++ -c -Itest #{t.prerequisites.first} -o #{t.name}"
     end
   end
 
-  file 'test/test' => (sources + test_sources).map(&dot_o) + %w[gtest_main.a] do |t|
+  dependencies = (sources + test_sources).map {|source| build_path.join dot_o[source] } + [build_path.join('gtest_main.a')]
+  file build_path.join('test') => dependencies do |t|
     sh "c++ -o #{t.name} #{t.prerequisites.join ' '}"
   end
 
-  task all: "test/test" do |t|
+  task all: build_path.join('test') do |t|
     sh "./#{t.prerequisites.first}"
   end
 
   task :clean do
-    sh "rm *.o test/test"
+    sh "rm #{dependencies.join ' ' } #{build_path.join 'test' }"
   end
 end
 
@@ -86,7 +88,7 @@ task default: :build
 
 task upload: :build do |t|
   port = Dir['/dev/tty.usbmodem*'].first or raise "plug the arduino in!"
-  sh "avrdude -v -v -pm328p -carduino -P #{port} -U flash:w:#{t.prerequisites.first}:i"
+  sh "avrdude -v -v -pm328p -carduino -P #{port} -U flash:w:pressit.hex:i"
 end
 
 task :clean do
