@@ -5,6 +5,7 @@ public:
 	Pin(int, int);
 	virtual int digitalRead();
 	virtual void digitalWrite(int);
+	virtual void analogWrite(int);
 	virtual void tone(int);
 	virtual void tone(int, int);
 	virtual void noTone();
