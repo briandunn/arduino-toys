@@ -17,7 +17,7 @@ void setup() {
 	yellow               = new Pin(13, OUTPUT);
 	Button* redButton    = new PollButton(new Pin(2, INPUT));
 	Button* yellowButton = new PollButton(new Pin(3, INPUT));
-	song                 = new Song(piezo, millis);
+	song                 = new Song(piezo);
 	int i = 0;
 	while(i < roundCount)
 		rounds[i++] = new Round(song, redButton, yellowButton);

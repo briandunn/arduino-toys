@@ -5,9 +5,8 @@
 class Song {
 	public:
 
-	Song(Pin* pin, long unsigned int (*clock)()) {
+	Song(Pin* pin) {
 		this->pin = pin;
-		this->clock = clock;
 		over = false;
 	};
 
@@ -27,7 +26,6 @@ class Song {
 	private:
 
 	Pin* pin;
-	long unsigned int (* clock)();
 	static const int A        = 440;
 	static const int E        = 659;
 	static const int duration = 250;

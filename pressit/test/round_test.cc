@@ -3,6 +3,8 @@
 #include "test_pin.h"
 #include "gtest/gtest.h"
 
+void delay(int) {}
+
 class MockPin : public Pin {
 public:
 	MockPin(): Pin(0, 0) {}
@@ -12,6 +14,7 @@ public:
 	int digitalRead() {
 		return nextRead;
 	}
+	void tone(int, int) {}
 private:
 	int nextRead;
 };
@@ -21,8 +24,9 @@ TEST(RoundTest, Works) {
 	MockPin* yellowPin = new MockPin();
 	Button* red        = new PollButton(redPin);
 	Button* yellow     = new PollButton(yellowPin);
-	Round* round       = new Round(red, yellow);
+	Round* round       = new Round(new Song(new MockPin()), red, yellow);
 
+	round->tick(); //song
 	redPin->setNextRead(1);
 	yellowPin->setNextRead(1);
 	round->tick();

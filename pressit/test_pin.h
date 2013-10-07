@@ -17,6 +17,16 @@ Pin::tone(int val) {
 }
 
 void
+Pin::tone(int val, int dur) {
+	throw("stubbed");
+}
+
+void
 Pin::noTone() {
+	throw("stubbed");
+}
+
+void
+Pin::analogWrite(int) {
 	throw("stubbed");
 }
