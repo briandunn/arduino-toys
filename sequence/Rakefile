@@ -10,7 +10,7 @@ CXX_FLAGS = <<-FLAGS.gsub "\n", ' '
   -I#{arduino_path.join 'variants/standard' }
 FLAGS
 
-sources = %w[sequence.cpp ../libraries/pin.cpp]
+sources = %w[sequence.cpp ../libraries/interrupt_button.cpp ../libraries/pin.cpp]
 for source in sources
   file dot_o[source] => source do |t|
     sh "avr-gcc #{CXX_FLAGS} -I../libraries -c #{t.prerequisites.first} -o #{t.name}"
