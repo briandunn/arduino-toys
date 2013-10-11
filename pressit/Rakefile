@@ -1,24 +1,15 @@
-dot_o = ->(file) {"#{file.to_s.gsub /\..*$/, '' }.o"}
+dot_o = ->(file) {"#{File.basename file}.o"}
 
+import '../rakelib/gtest.rake'
 namespace :test do
   build_path = Pathname 'test'
-  gtest_sources = %w[gtest-all.cc gtest_main.cc]
+  lib_path   = Pathname '../libraries'
   test_sources  = %w[round_test.cc interrupt_button_test.cc]
-  sources       = %w[interrupt_button.cpp poll_button.cpp]
-
-  for source in gtest_sources
-    file build_path.join(dot_o[source]) => "../gtest/src/#{source}" do |t|
-      sh "c++ -c -I../gtest -I../gtest/include #{t.prerequisites.first} -o #{t.name}"
-    end
-  end
-
-  file build_path.join('gtest_main.a') => gtest_sources.map {|source| build_path.join dot_o[source] } do |t|
-    sh "ar -rv #{t.name} #{t.prerequisites.join ' '}"
-  end
+  sources       = %w[interrupt_button.cpp poll_button.cpp].map {|source| lib_path.join source }
 
   for source in test_sources
     file build_path.join(dot_o[source]) => "test/#{source}" do |t|
-      sh "c++ -c -I. -Itest -I../gtest/include #{t.prerequisites.first} -o #{t.name}"
+      sh "c++ -c -I. -Itest -I../libraries -I../gtest/include #{t.prerequisites.first} -o #{t.name}"
     end
   end
 
@@ -28,9 +19,9 @@ namespace :test do
     end
   end
 
-  dependencies = (sources + test_sources).map {|source| build_path.join dot_o[source] } + [build_path.join('gtest_main.a')]
-  file build_path.join('test') => dependencies do |t|
-    sh "c++ -o #{t.name} #{t.prerequisites.join ' '}"
+  dependencies = (sources + test_sources).map {|source| build_path.join dot_o[source] }
+  file build_path.join('test') => dependencies + %i[gtest] do |t|
+    sh "c++ -o #{t.name} #{dependencies.join ' '} #$gtest_lib"
   end
 
   task all: build_path.join('test') do |t|
