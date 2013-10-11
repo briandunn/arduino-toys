@@ -7,9 +7,10 @@ gtest_sources = %w[-all _main].map do |source|
 end
 dot_o = ->(source) { build_path.join "#{source.basename}.o" }
 
-FileUtils.mkdir_p build_path
+directory build_path.to_s
+
 for source in gtest_sources
-  file dot_o[source] => source do |t|
+  file dot_o[source] => [source, build_path] do |t|
     sh <<-SH.gsub /\s+/, ' '
       c++ -c -I #{gtest_path}
              -I #{gtest_path.join 'include'}
