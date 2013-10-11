@@ -1,4 +1,4 @@
-root = Pathname(__FILE__).join '../..'
+root = Pathname(__FILE__).dirname.join '..'
 gtest_path = root.join 'gtest'
 build_path = root.join 'tmp/gtest'
 $gtest_lib = build_path.join 'gtest.a'

@@ -1,14 +1,6 @@
+import '../rakelib/gtest.rake'
+import '../rakelib/arduino.rake'
 dot_o = ->(file) {"#{file.to_s.gsub /\.[^\.]+$/, '' }.o"}
-
-arduino_path = Pathname '/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino'
-core_path = arduino_path.join 'cores/arduino'
-
-CXX_FLAGS = <<-FLAGS.gsub "\n", ' '
-  -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=atmega328p
-  -DF_CPU=16000000L -MMD -DUSB_VID=null -DUSB_PID=null -DARDUINO=105
-  -I#{arduino_path.join 'cores/arduino' }
-  -I#{arduino_path.join 'variants/standard' }
-FLAGS
 
 sources = %w[sequence.cpp ../libraries/interrupt_button.cpp ../libraries/pin.cpp]
 for source in sources
@@ -17,23 +9,16 @@ for source in sources
   end
 end
 
-core_sources = %w[WInterrupts.c wiring.c wiring_analog.c wiring_digital.c
-    wiring_pulse.c wiring_shift.c CDC.cpp HardwareSerial.cpp HID.cpp
-    IPAddress.cpp main.cpp new.cpp Print.cpp Stream.cpp Tone.cpp USBCore.cpp
-    WMath.cpp WString.cpp avr-libc/malloc.c avr-libc/realloc.c].map { |file| core_path.join(file) }
-
-for core_source in core_sources
-  file dot_o[core_source.basename] => core_source do |t|
-    sh "avr-gcc #{CXX_FLAGS} -c #{t.prerequisites.first}"
-  end
+task :clean do
+  sh "rm *.o *.d *.hex *.elf"
 end
 
-file 'core.a' => core_sources.map {|source| dot_o[source.basename] } do |t|
-  sh "avr-ar rcs #{t.name} #{ t.prerequisites.join ' ' }"
+task test: :gtest do
+  puts $gtest_lib
 end
 
-file 'sequence.elf' => sources.map(&dot_o) + %w[core.a] do |t|
-  sh "avr-gcc -Os -Wl,--gc-sections -L. -lm -mmcu=atmega328p -o #{t.name} #{t.prerequisites.join ' '}"
+file 'sequence.elf' => sources.map(&dot_o) + %w[arduino] do |t|
+  sh "avr-gcc -Os -Wl,--gc-sections -L. -lm -mmcu=atmega328p -o #{t.name} #{sources.map(&dot_o).join ' '} #$arduino_lib"
 end
 
 file 'sequence.hex' => 'sequence.elf' do |t|
@@ -48,6 +33,3 @@ task upload: :build do |t|
   sh "avrdude -v -v -pm328p -carduino -P #{port} -U flash:w:sequence.hex:i"
 end
 
-task :clean do
-  sh "rm *.o *.d *.a *.hex *.elf"
-end
