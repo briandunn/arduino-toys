@@ -1,6 +1,8 @@
-import '../rakelib/gtest.rake'
+load '../rakelib/gtest.rake'
 load '../rakelib/arduino.rake'
 build_path = Pathname "tmp"
+hex = build_path.join 'payload.hex'
+elf = build_path.join 'payload.elf'
 dot_o = ->(file) { build_path.join File.basename "#{file}.o" }
 directory build_path.to_s
 
@@ -13,28 +15,39 @@ end
 
 task(:clean) { FileUtils.rm_rf build_path }
 
-file build_path.join('sequence.elf') => sources.map(&dot_o) + [$arduino_lib] do |t|
+file elf => sources.map(&dot_o) + [$arduino_lib] do |t|
   sh "avr-gcc -Os -Wl,--gc-sections -L. -lm -mmcu=atmega328p -o #{t.name} #{t.prerequisites.join ' '}"
 end
 
-file build_path.join('sequence.hex') => build_path.join('sequence.elf') do |t|
+file hex => elf do |t|
   sh "avr-objcopy -O ihex -R .eeprom #{t.prerequisites.first} #{t.name}"
 end
 
-task build: build_path.join('sequence.hex')
+task build: hex
 task default: :build
 
 task upload: :build do |t|
   port = Dir['/dev/tty.usbmodem*'].first or raise "plug the arduino in!"
-  sh "avrdude -v -v -pm328p -carduino -P #{port} -U flash:w:sequence.hex:i"
+  sh "avrdude -v -v -pm328p -carduino -P #{port} -U flash:w:#{hex}:i"
 end
 
 namespace :test do
-  file 'sequence.o' => 'sequence.cpp' do |t|
-    sh "c++ -c -I../libraries #{t.prerequisites.first}"
+  build_path = Pathname 'test/tmp'
+  executable = build_path.join 'run'
+  directory build_path.to_s
+  sources = %w[sequence.cpp test/sequence_test.cpp]
+  sources.each do |source|
+    file dot_o[source] => sources + [build_path] do |t|
+      sh "c++ -c -I ../libraries -Itest #{source} -o #{t.name}"
+    end
   end
 
-  file 'test' => %i[sequence.o gtest] do |t|
-    sh "c++ -o #{t.name} sequence.o #$gtest_lib"
+  file executable => sources.map(&dot_o) + [$gtest_lib] do |t|
+    sh "c++ -o #{t.name} #{t.prerequisites.join ' '}"
   end
+  task all: executable do
+    sh executable.to_s
+  end
+  task(:clean) { FileUtils.rm_rf build_path }
 end
+task test: 'test:all'
