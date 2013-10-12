@@ -1,5 +1,5 @@
 import '../rakelib/gtest.rake'
-import '../rakelib/arduino.rake'
+load '../rakelib/arduino.rake'
 build_path = Pathname "tmp"
 dot_o = ->(file) { build_path.join File.basename "#{file}.o" }
 directory build_path.to_s
@@ -13,8 +13,8 @@ end
 
 task(:clean) { FileUtils.rm_rf build_path }
 
-file build_path.join('sequence.elf') => sources.map(&dot_o) + %w[arduino] do |t|
-  sh "avr-gcc -Os -Wl,--gc-sections -L. -lm -mmcu=atmega328p -o #{t.name} #{sources.map(&dot_o).join ' '} #$arduino_lib"
+file build_path.join('sequence.elf') => sources.map(&dot_o) + [$arduino_lib] do |t|
+  sh "avr-gcc -Os -Wl,--gc-sections -L. -lm -mmcu=atmega328p -o #{t.name} #{t.prerequisites.join ' '}"
 end
 
 file build_path.join('sequence.hex') => build_path.join('sequence.elf') do |t|
