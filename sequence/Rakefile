@@ -1,31 +1,27 @@
 import '../rakelib/gtest.rake'
 import '../rakelib/arduino.rake'
-dot_o = ->(file) {"#{file.to_s.gsub /\.[^\.]+$/, '' }.o"}
+build_path = Pathname "tmp"
+dot_o = ->(file) { build_path.join File.basename "#{file}.o" }
+directory build_path.to_s
 
 sources = %w[sequence.cpp ../libraries/interrupt_button.cpp ../libraries/pin.cpp]
-for source in sources
-  file dot_o[source] => source do |t|
-    sh "avr-gcc #{CXX_FLAGS} -I../libraries -c #{t.prerequisites.first} -o #{t.name}"
+sources.each do |source|
+  file dot_o[source] => [source, build_path] do |t|
+    sh "avr-gcc -I ../libraries #{CXX_FLAGS} -c #{source} -o #{t.name}"
   end
 end
 
-task :clean do
-  sh "rm *.o *.d *.hex *.elf"
-end
+task(:clean) { FileUtils.rm_rf build_path }
 
-task test: :gtest do
-  puts $gtest_lib
-end
-
-file 'sequence.elf' => sources.map(&dot_o) + %w[arduino] do |t|
+file build_path.join('sequence.elf') => sources.map(&dot_o) + %w[arduino] do |t|
   sh "avr-gcc -Os -Wl,--gc-sections -L. -lm -mmcu=atmega328p -o #{t.name} #{sources.map(&dot_o).join ' '} #$arduino_lib"
 end
 
-file 'sequence.hex' => 'sequence.elf' do |t|
+file build_path.join('sequence.hex') => build_path.join('sequence.elf') do |t|
   sh "avr-objcopy -O ihex -R .eeprom #{t.prerequisites.first} #{t.name}"
 end
 
-task build: 'sequence.hex'
+task build: build_path.join('sequence.hex')
 task default: :build
 
 task upload: :build do |t|
@@ -33,3 +29,12 @@ task upload: :build do |t|
   sh "avrdude -v -v -pm328p -carduino -P #{port} -U flash:w:sequence.hex:i"
 end
 
+namespace :test do
+  file 'sequence.o' => 'sequence.cpp' do |t|
+    sh "c++ -c -I../libraries #{t.prerequisites.first}"
+  end
+
+  file 'test' => %i[sequence.o gtest] do |t|
+    sh "c++ -o #{t.name} sequence.o #$gtest_lib"
+  end
+end

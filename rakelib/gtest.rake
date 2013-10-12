@@ -9,12 +9,12 @@ dot_o = ->(source) { build_path.join "#{source.basename}.o" }
 
 directory build_path.to_s
 
-for source in gtest_sources
+gtest_sources.each do |source|
   file dot_o[source] => [source, build_path] do |t|
     sh <<-SH.gsub /\s+/, ' '
       c++ -c -I #{gtest_path}
              -I #{gtest_path.join 'include'}
-             #{t.prerequisites.first} -o #{t.name}
+             #{source} -o #{t.name}
     SH
   end
 end
