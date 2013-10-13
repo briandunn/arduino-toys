@@ -120,24 +120,20 @@ class Sequence {
 class Recorder {
   public:
     Recorder(Step* firstMove, Button* red, Button* yellow) :
-      success(true),
-      current(firstMove),
+      success(false),
+      complete(false),
+      sequence(firstMove),
       red(red),
       yellow(yellow) {}
 
     bool success;
-    // returns true when you are done with the sequence, or you failed.
-    bool recordPresses() {
-      bool redPressed    = red->wasPressed();
-      bool yellowPressed = yellow->wasPressed();
-      if(!redPressed && !yellowPressed) return false;
-      success = (current->red && redPressed) || (current->yellow && yellowPressed);
-      current = current->next;
-      return current == NULL || !success;
-    }
+    bool complete;
+
+    void recordPress() { }
+
+    Step* sequence;
 
   private:
-    Step* current;
     Button* red;
     Button* yellow;
 };
@@ -181,14 +177,14 @@ void setup() {
   yellowButton = new IndicatingButton(yellow, 1);
   sequence     = new Sequence(red, yellow);
   recorder     = new Recorder(sequence->increment(), redButton, yellowButton);
+  sequence->play();
 }
 
 void loop() {
-  gameOver();
-  /* if(!sequence->played) sequence->play(); */
-
-  /* if(recorder->recordPresses()) { */
-  /*   if(recorder->success) sequence->increment(); */
-  /*   else gameOver(); */
-  /* } */
+  recorder->recordPress();
+  if(recorder->complete)
+    if(recorder->success) {
+      recorder->sequence = sequence->increment();
+      sequence->play();
+    } else gameOver();
 }
