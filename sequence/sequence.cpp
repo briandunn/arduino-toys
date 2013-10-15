@@ -2,11 +2,12 @@
 #include "Arduino.h"
 #include "interrupt_button.h"
 
+enum Color { RED, YELLOW };
+
 class Move {
   public:
-    Move(Pin* lamp): red(false), yellow(false), lamp(lamp) {}
-    bool red;
-    bool yellow;
+    Move(Pin* lamp): lamp(lamp) {}
+    Color color;
 
   Move* indicate() {
     song();
@@ -27,22 +28,18 @@ class Move {
 
 class Red : public Move {
   public:
-    Red(Pin* lamp, Pin* piezo) : Move(lamp), piezo(piezo) { red = true; }
+    Red(Pin* lamp, Pin* piezo) : Move(lamp), piezo(piezo) { color = RED; }
   private:
     Pin* piezo;
-    void song() {
-      piezo->tone(220, 100);
-    }
+    void song() { piezo->tone(220, 100); }
 };
 
 class Yellow : public Move {
   public:
-    Yellow(Pin* lamp, Pin* piezo) : Move(lamp), piezo(piezo) { yellow = true; }
+    Yellow(Pin* lamp, Pin* piezo) : Move(lamp), piezo(piezo) { color = YELLOW; }
   private:
     Pin* piezo;
-    void song() {
-      piezo->tone(660, 100);
-    }
+    void song() { piezo->tone(660, 100); }
 };
 
 class IndicatingButton : public InterruptButton {
@@ -62,12 +59,10 @@ class IndicatingButton : public InterruptButton {
 class Step {
   public:
     Step(Move* move) :next(NULL), move(move) {
-      red = move->red;
-      yellow = move->yellow;
+      color = move->color;
     }
     Step* next;
-    bool red;
-    bool yellow;
+    Color color;
     void indicate() { move->indicate(); }
   private:
     Move* move;
@@ -129,7 +124,17 @@ class Recorder {
     bool success;
     bool complete;
 
-    void recordPress() { }
+    void recordPress() {
+      bool redPressed    = red->wasPressed();
+      bool yellowPressed = yellow->wasPressed();
+      if(!redPressed && !yellowPressed) {
+        complete = false;
+      } else {
+        success  = (sequence->color == RED && red->wasPressed()) || (sequence->color == YELLOW && yellow->wasPressed());
+        complete = sequence->next == NULL;
+        sequence = sequence->next;
+      }
+    }
 
     Step* sequence;
 
@@ -156,7 +161,7 @@ void gameOver() {
   const int F = 348;
   const int notes[]     = {D, D, D, D, F, E, E, D, D, C, D};
   const int durations[] = {3, 2, 1, 3, 2, 1, 2, 1, 2, 1, 3};
-  const int bpm = 250;
+  const int bpm = 200;
   for(int i = 0; i < 11; i++) {
     int ms = durations[i] * bpm;
     redLamp->analogWrite(notes[i]);
@@ -182,9 +187,10 @@ void setup() {
 
 void loop() {
   recorder->recordPress();
-  if(recorder->complete)
+  if(recorder->complete) {
     if(recorder->success) {
       recorder->sequence = sequence->increment();
       sequence->play();
     } else gameOver();
+  }
 }

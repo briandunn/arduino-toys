@@ -35,14 +35,12 @@ namespace :test do
   build_path = Pathname 'test/tmp'
   executable = build_path.join 'run'
   directory build_path.to_s
-  sources = %w[test/sequence_test.cpp]
-  sources.each do |source|
-    file dot_o[source] => sources + [build_path] do |t|
-      sh "c++ -c -I ../gtest/include -I ../libraries -Itest #{source} -o #{t.name}"
-    end
+  source = %[test/sequence_test.cpp]
+  file dot_o[source] => [source, 'sequence.cpp', build_path] do |t|
+    sh "c++ -c -I ../gtest/include -I ../libraries -Itest #{source} -o #{t.name}"
   end
 
-  file executable => sources.map(&dot_o) + [$gtest_lib] do |t|
+  file executable => [dot_o[source], $gtest_lib] do |t|
     sh "c++ -o #{t.name} #{t.prerequisites.join ' '}"
   end
   task all: executable do
