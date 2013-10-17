@@ -1,103 +1,59 @@
-#include "pin.h"
 #include "gtest/gtest.h"
-#include "test/test_pin.h"
-#include "../sequence.cpp"
-void delay(int i) {}
+int random(int);
+#include "game.h"
 int random(int range) { return 1; }
-InterruptButton::InterruptButton(int i) {}
-bool InterruptButton::wasPressed() { return true; }
 
-class StubButton : public Button {
-  public:
-    StubButton() : pressed(false) {}
-    bool wasPressed() { return pressed; }
-    bool pressed;
-};
-
-class RecorderTest : public testing::Test {
+class GameTest : public testing::Test {
   protected:
   virtual void SetUp() {
-    redButton    = new StubButton();
-    yellowButton = new StubButton();
-    red          = new Red(new Pin(0,0), new Pin(0,0));
-    yellow       = new Yellow(new Pin(0,0), new Pin(0,0));
-    step         = new Step(red);
-    recorder     = new Recorder(step, redButton, yellowButton);
+    step = new Step(RED);
+    game = new Game(step);
   }
 
-  StubButton* redButton;
-  StubButton* yellowButton;
-  Move*       red;
-  Move*       yellow;
-  Step*       step;
-  Recorder*   recorder;
+  Step* step;
+  Game* game;
 };
 
   // neither button has been pressed
-TEST_F(RecorderTest, noPress) {
-  recorder->recordPress();
-
-  EXPECT_FALSE(recorder->complete);
-  EXPECT_FALSE(recorder->success);
+TEST_F(GameTest, noPress) {
+  ASSERT_EQ(game->record(NONE), PLAYING);
 }
 
   // the correct button has been pressed but the sequence is incomplete
-TEST_F(RecorderTest, incomplete) {
-  step->next = new Step(red);
-  redButton->pressed = true;
-
-  recorder->recordPress();
-
-  EXPECT_FALSE(recorder->complete);
-  EXPECT_TRUE(recorder->success);
+TEST_F(GameTest, incomplete) {
+  step->next = new Step(RED);
+  ASSERT_EQ(game->record(RED), PLAYING);
 }
 
   // the correct button has been pressed and the sequence is complete
-TEST_F(RecorderTest, complete) {
-  redButton->pressed = true;
-
-  recorder->recordPress();
-
-  EXPECT_TRUE(recorder->complete);
-  EXPECT_TRUE(recorder->success);
+TEST_F(GameTest, complete) {
+  ASSERT_EQ(game->record(RED), BEAT_LEVEL);
 }
 
   // the incorrect button has been pressed and you loose
-TEST_F(RecorderTest, incorrect) {
-  yellowButton->pressed = true;
-
-  recorder->recordPress();
-
-  EXPECT_TRUE(recorder->complete);
-  EXPECT_FALSE(recorder->success);
+TEST_F(GameTest, incorrect) {
+  ASSERT_EQ(game->record(YELLOW), GAME_OVER);
 }
 
   // sequential presses
-TEST_F(RecorderTest, sequentialPresses) {
-  step->next = new Step(yellow);
-  step->next->next = new Step(red);
+TEST_F(GameTest, sequentialPresses) {
+  step->next = new Step(YELLOW);
+  step->next->next = new Step(RED);
 
-  redButton->pressed = true;
-
-  recorder->recordPress();
-
-  EXPECT_FALSE(recorder->complete);
-  EXPECT_TRUE(recorder->success);
-
-  redButton->pressed = false;
-  yellowButton->pressed = true;
-
-  recorder->recordPress();
-
-  EXPECT_FALSE(recorder->complete);
-  EXPECT_TRUE(recorder->success);
-
-  redButton->pressed = false;
-  yellowButton->pressed = true;
-
-  recorder->recordPress();
-
-  EXPECT_TRUE(recorder->complete);
-  EXPECT_FALSE(recorder->success);
+  ASSERT_EQ(game->record(RED), PLAYING);
+  ASSERT_EQ(game->record(YELLOW), PLAYING);
+  ASSERT_EQ(game->record(YELLOW), GAME_OVER);
 }
 
+  // beating a level adds a step and starts over
+  // (the added steps are always YELLOW in our test)
+TEST_F(GameTest, incrementLevel) {
+  ASSERT_EQ(game->record(RED), BEAT_LEVEL);
+
+  ASSERT_EQ(game->record(RED), PLAYING);
+  ASSERT_EQ(game->record(YELLOW), BEAT_LEVEL);
+
+  ASSERT_EQ(game->record(RED), PLAYING);
+  ASSERT_EQ(game->record(YELLOW), PLAYING);
+  ASSERT_EQ(game->record(RED), GAME_OVER);
+}
