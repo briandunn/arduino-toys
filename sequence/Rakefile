@@ -15,7 +15,7 @@ end
 
 import ".depends.mf"
 
-sources = %w[sequence.cpp ../libraries/interrupt_button.cpp ../libraries/pin.cpp]
+sources = %w[sequence.cpp ../libraries/poll_button.cpp ../libraries/pin.cpp]
 sources.each do |source|
   file dot_o[source] => [source, build_path] do |t|
     sh "avr-gcc -I ../libraries #{CXX_FLAGS} -c #{source} -o #{t.name}"

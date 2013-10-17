@@ -1,6 +1,6 @@
 #include "pin.h"
 #include "Arduino.h"
-#include "interrupt_button.h"
+#include "poll_button.h"
 #include "game.h"
 class Move {
   public:
@@ -40,12 +40,12 @@ class Yellow : public Move {
     void song() { piezo->tone(660, 100); }
 };
 
-class IndicatingButton : public InterruptButton {
+class IndicatingButton : public PollButton {
   public:
-    IndicatingButton(Move* move, int interrupt) : InterruptButton(interrupt), move(move) { }
+    IndicatingButton(Move* move, int pin) : PollButton(new Pin(pin, INPUT)), move(move) { }
 
   bool wasPressed() {
-    bool was = InterruptButton::wasPressed();
+    bool was = PollButton::wasPressed();
     if(was) move->indicate();
     return was;
   }
@@ -61,40 +61,63 @@ Pin* redLamp;
 Pin* yellowLamp;
 Game* game;
 
-void gameOver() {
-  // the frequencies of middle C, D, E, and F
-  static bool played = false;
-  if(played) return;
-  const int C = 262;
-  const int D = 294;
-  const int E = 330;
-  const int F = 348;
-  const int notes[]     = {D, D, D, D, F, E, E, D, D, C, D};
-  const int durations[] = {3, 2, 1, 3, 2, 1, 2, 1, 2, 1, 3};
-  const int bpm = 200;
-  for(int i = 0; i < 11; i++) {
+enum Note {
+  C  = 262,
+  CS = 277,
+  D  = 294,
+  E  = 330,
+  F  = 348,
+  G  = 392,
+  A  = 440,
+  B  = 494
+};
+
+void playSong(Note notes[], int durations[], int length) {
+  const int bpm = 150;
+  for(int i = 0; i < length; i++) {
     int ms = durations[i] * bpm;
     redLamp->analogWrite(notes[i]);
     yellowLamp->analogWrite(ms);
     piezo->tone(notes[i], ms * 0.75);
     delay(ms);
   }
-  played = true;
+  redLamp->digitalWrite(LOW);
+  yellowLamp->digitalWrite(LOW);
+}
+
+void beatLevel() {
+  Note notes[]    = {C, C, C, G};
+  int durations[] = {1, 1, 1, 3};
+  playSong(notes, durations, 4);
+}
+
+void gameOver() {
+  Note notes[]    = {D, D, D, D, F, E, E, D, D, C, D};
+  int durations[] = {3, 2, 1, 3, 2, 1, 2, 1, 2, 1, 3};
+  playSong(notes, durations, 11);
 }
 
 Color getPress() {
   Color color = NONE;
-  if(yellowButton->wasPressed())
+  if(yellowButton->wasPressed()) {
     color = YELLOW;
-  else if(redButton->wasPressed())
+    Serial.println("YELLOW");
+  } else if(redButton->wasPressed()) {
     color = RED;
+  Serial.println("RED");
+  }
   return color;
 }
+
+Move* red;
+Move* yellow;
 
 void playSequence(Step* step) {
   Step* current = step;
   while(current != NULL) {
-    /* step->indicate(); */
+    Move* move;
+    move = current->color == YELLOW ? yellow : red;
+    move->indicate();
     current = current->next;
   }
 }
@@ -103,12 +126,13 @@ void setup() {
   redLamp      = new Pin(10, OUTPUT);
   yellowLamp   = new Pin(9, OUTPUT);
   piezo        = new Pin(11, OUTPUT);
-  Move* red    = new Red(redLamp, piezo);
-  Move* yellow = new Yellow(yellowLamp, piezo);
-  redButton    = new IndicatingButton(red,    0);
-  yellowButton = new IndicatingButton(yellow, 1);
+  red          = new Red(redLamp, piezo);
+  yellow       = new Yellow(yellowLamp, piezo);
+  redButton    = new IndicatingButton(red,    2);
+  yellowButton = new IndicatingButton(yellow, 3);
   game         = new Game(Step::first());
   playSequence(game->first);
+  Serial.begin(9600);
 }
 
 
@@ -118,6 +142,7 @@ void loop() {
       gameOver();
       break;
     case BEAT_LEVEL:
+      beatLevel();
       playSequence(game->first);
       break;
     case PLAYING:
