@@ -1,10 +1,19 @@
+require 'rake/loaders/makefile'
 load '../rakelib/gtest.rake'
 load '../rakelib/arduino.rake'
 build_path = Pathname "tmp"
 hex = build_path.join 'payload.hex'
 elf = build_path.join 'payload.elf'
-dot_o = ->(file) { build_path.join File.basename "#{file}.o" }
+dot_o = ->(file) { build_path.join File.basename(file).gsub /\.[^\.]+$/, '.o' }
 directory build_path.to_s
+
+CXX_FLAGS << " -I ../libraries"
+SOURCES = FileList['*.h', '*.cpp']
+file ".depends.mf" => SOURCES.to_a do |t|
+  sh "makedepend -Y -f- -ptmp/ -- #{CXX_FLAGS} -- #{SOURCES} > #{t.name} 2> /dev/null"
+end
+
+import ".depends.mf"
 
 sources = %w[sequence.cpp ../libraries/interrupt_button.cpp ../libraries/pin.cpp]
 sources.each do |source|
@@ -32,12 +41,13 @@ task upload: :build do |t|
 end
 
 namespace :test do
-  build_path = Pathname 'test/tmp'
-  executable = build_path.join 'run'
-  directory build_path.to_s
+  test_build_path = Pathname 'test/tmp'
+  dot_o = ->(file) { test_build_path.join File.basename(file).gsub /\.[^\.]+$/, '.o' }
+  executable = test_build_path.join 'run'
+  directory test_build_path.to_s
   source = %[test/sequence_test.cpp]
-  file dot_o[source] => [source, 'sequence.cpp', build_path] do |t|
-    sh "c++ -c -I ../gtest/include -I ../libraries -Itest #{source} -o #{t.name}"
+  file dot_o[source] => [source, 'game.h', test_build_path] do |t|
+    sh "c++ -c -I ../gtest/include -I ../libraries -I. #{source} -o #{t.name}"
   end
 
   file executable => [dot_o[source], $gtest_lib] do |t|
@@ -46,6 +56,6 @@ namespace :test do
   task all: executable do
     sh executable.to_s
   end
-  task(:clean) { FileUtils.rm_rf build_path }
+  task(:clean) { FileUtils.rm_rf test_build_path }
 end
 task test: 'test:all'
