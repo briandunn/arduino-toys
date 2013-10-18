@@ -29,7 +29,7 @@ class Step {
 Step* Step::_first = NULL;
 class Game {
   public:
-    Game(Step* first): first(first), current(first), status(PLAYING) { }
+    Game(Step* first): first(first), level(1), current(first), status(PLAYING) { }
 
     Step* first;
 
@@ -41,10 +41,13 @@ class Game {
           current->increment();
           current = first;
           status = BEAT_LEVEL;
+          level++;
         } else current = current->next;
       } else status = GAME_OVER;
       return status;
     }
+
+    int level;
 
   private:
     Step* current;

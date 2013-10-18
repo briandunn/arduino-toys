@@ -2,6 +2,23 @@
 #include "Arduino.h"
 #include "poll_button.h"
 #include "game.h"
+
+enum Pitch {
+  C  = 262,
+  CS = 277,
+  D  = 294,
+  E  = 330,
+  F  = 348,
+  G  = 392,
+  A  = 440,
+  B  = 494
+};
+
+struct Note {
+  Pitch pitch;
+  float duration;
+};
+
 class Move {
   public:
     Move(Pin* lamp): lamp(lamp) {}
@@ -29,7 +46,7 @@ class Red : public Move {
     Red(Pin* lamp, Pin* piezo) : Move(lamp), piezo(piezo) { color = RED; }
   private:
     Pin* piezo;
-    void song() { piezo->tone(220, 100); }
+    void song() { piezo->tone(A, 100); }
 };
 
 class Yellow : public Move {
@@ -37,7 +54,7 @@ class Yellow : public Move {
     Yellow(Pin* lamp, Pin* piezo) : Move(lamp), piezo(piezo) { color = YELLOW; }
   private:
     Pin* piezo;
-    void song() { piezo->tone(660, 100); }
+    void song() { piezo->tone(E, 100); }
 };
 
 class IndicatingButton : public PollButton {
@@ -60,23 +77,6 @@ IndicatingButton* yellowButton;
 Pin* redLamp;
 Pin* yellowLamp;
 Game* game;
-
-enum Pitch {
-  C  = 262,
-  CS = 277,
-  D  = 294,
-  E  = 330,
-  F  = 348,
-  G  = 392,
-  A  = 440,
-  B  = 494
-};
-
-struct Note {
-  Pitch pitch;
-  float duration;
-};
-
 
 void playSong(Note notes[], int length) {
   const int bpm = 150;
@@ -106,14 +106,33 @@ void gameOver() {
   playSong(notes, 11);
 }
 
+void indicateLevel(int level) {
+  Pitch scale[] = {C,D,E,F,G,A,B};
+  int factor = -1;
+  for(int i = 0; i< level; i++) {
+    redLamp->digitalWrite(i % 2);
+    yellowLamp->digitalWrite((i + 1) % 2);
+    int j = (i % 7);
+    if(j == 0) factor ++;
+    int freq = scale[j] * (1 << factor);
+    piezo->tone(freq, 100);
+    delay(125);
+  }
+  redLamp->digitalWrite(LOW);
+  yellowLamp->digitalWrite(LOW);
+}
+
 Color getPress() {
+  static bool seeded = false;
   Color color = NONE;
   if(yellowButton->wasPressed()) {
+    if(!seeded) {
+      randomSeed(millis());
+      seeded = true;
+    }
     color = YELLOW;
-    Serial.println("YELLOW");
   } else if(redButton->wasPressed()) {
     color = RED;
-  Serial.println("RED");
   }
   return color;
 }
@@ -141,7 +160,6 @@ void setup() {
   yellowButton = new IndicatingButton(yellow, 3);
   game         = new Game(Step::first());
   playSequence(game->first);
-  Serial.begin(9600);
 }
 
 
@@ -149,6 +167,7 @@ void loop() {
   switch(game->record(getPress())) {
     case GAME_OVER:
       gameOver();
+      indicateLevel(game->level);
       break;
     case BEAT_LEVEL:
       beatLevel();
