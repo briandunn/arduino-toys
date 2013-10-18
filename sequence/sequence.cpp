@@ -61,7 +61,7 @@ Pin* redLamp;
 Pin* yellowLamp;
 Game* game;
 
-enum Note {
+enum Pitch {
   C  = 262,
   CS = 277,
   D  = 294,
@@ -72,13 +72,20 @@ enum Note {
   B  = 494
 };
 
-void playSong(Note notes[], int durations[], int length) {
+struct Note {
+  Pitch pitch;
+  float duration;
+};
+
+
+void playSong(Note notes[], int length) {
   const int bpm = 150;
   for(int i = 0; i < length; i++) {
-    int ms = durations[i] * bpm;
-    redLamp->analogWrite(notes[i]);
+    int ms = notes[i].duration * bpm;
+    Pitch pitch = notes[i].pitch;
+    redLamp->analogWrite(pitch);
     yellowLamp->analogWrite(ms);
-    piezo->tone(notes[i], ms * 0.75);
+    piezo->tone(pitch, ms * 0.75);
     delay(ms);
   }
   redLamp->digitalWrite(LOW);
@@ -86,15 +93,17 @@ void playSong(Note notes[], int durations[], int length) {
 }
 
 void beatLevel() {
-  Note notes[]    = {C, C, C, G};
-  int durations[] = {1, 1, 1, 3};
-  playSong(notes, durations, 4);
+  Note notes[] = {{C,1},{C,1},{C,1},{G,3}};
+  playSong(notes, 4);
 }
 
 void gameOver() {
-  Note notes[]    = {D, D, D, D, F, E, E, D, D, C, D};
-  int durations[] = {3, 2, 1, 3, 2, 1, 2, 1, 2, 1, 3};
-  playSong(notes, durations, 11);
+  Note notes[] = {
+    {D, 3}, {D, 2}, {D, 1}, {D, 3},
+    {F, 2}, {E, 1}, {E, 2}, {D, 1}, {D, 2}, {CS, 1},
+    {D, 3}
+  };
+  playSong(notes, 11);
 }
 
 Color getPress() {
