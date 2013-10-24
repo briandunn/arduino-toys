@@ -1,5 +1,5 @@
 require 'rake/loaders/makefile'
-load '../rakelib/gtest.rake'
+import '../rakelib/gtest.rake'
 load '../rakelib/arduino.rake'
 build_path = Pathname "tmp"
 hex = build_path.join 'payload.hex'
@@ -41,21 +41,13 @@ task upload: :build do |t|
 end
 
 namespace :test do
-  test_build_path = Pathname 'test/tmp'
-  dot_o = ->(file) { test_build_path.join File.basename(file).gsub /\.[^\.]+$/, '.o' }
-  executable = test_build_path.join 'run'
-  directory test_build_path.to_s
-  source = %[test/sequence_test.cpp]
-  file dot_o[source] => [source, 'game.h', test_build_path] do |t|
-    sh "c++ -c -I ../gtest/include -I ../libraries -I. #{source} -o #{t.name}"
+  sources = FileList['test/*_test.cpp']
+  rule '.o' => '.cpp' do |t|
+    sh "c++ -c -I ../gtest/include -I ../libraries -I. #{t.source} -o #{t.name}"
   end
 
-  file executable => [dot_o[source], $gtest_lib] do |t|
+  file 'test/run' => sources.ext('o') do |t|
     sh "c++ -o #{t.name} #{t.prerequisites.join ' '}"
   end
-  task all: executable do
-    sh executable.to_s
-  end
-  task(:clean) { FileUtils.rm_rf test_build_path }
+  task(:clean) { FileUtils.rm_rf sources.ext('o').add 'test/run' }
 end
-task test: 'test:all'

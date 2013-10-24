@@ -1,7 +1,7 @@
 root = Pathname(__FILE__).dirname.join '..'
 gtest_path = root.join 'gtest'
 build_path = root.join 'tmp/gtest'
-$gtest_lib = build_path.join 'gtest.a'
+gtest_lib = build_path.join 'gtest.a'
 gtest_sources = %w[-all _main].map do |source|
   gtest_path.join "src/gtest#{source}.cc"
 end
@@ -19,13 +19,13 @@ gtest_sources.each do |source|
   end
 end
 
-file $gtest_lib => gtest_sources.map(&dot_o) do |t|
+file gtest_lib => gtest_sources.map(&dot_o) do |t|
   sh "ar -rv #{t.name} #{t.prerequisites.join ' '}"
 end
 
 namespace :gtest do
   desc 'builds the gtest library'
-  task build: $gtest_lib
+  task build: gtest_lib
 
   desc 'cleans the gtest library'
   task clean: :build do
@@ -33,3 +33,9 @@ namespace :gtest do
   end
 end
 task gtest: 'gtest:build'
+
+task 'test/run' => gtest_lib.expand_path
+
+task test: 'test/run' do
+  sh 'test/run'
+end
