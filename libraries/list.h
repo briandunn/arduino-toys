@@ -28,12 +28,15 @@ template<typename T> class List {
 		}
 
 		void remove() {
-			if(more()) {
-				node* tmp = current;
+			node* tmp = current;
+			if(current->next != NULL) {
 				current = current->next;
-				previous->next = current;
-				delete tmp;
+				if(previous != NULL)
+					previous->next = current;
+			} else {
+				current = previous;
 			}
+			delete tmp;
 		}
 
 		bool more() { return !end(); }
@@ -43,7 +46,7 @@ template<typename T> class List {
 
 	List() : first(NULL) {}
 
-	void push(T item) {
+	void unshift(T item) {
 		first = new node(item, first);
 	}
 

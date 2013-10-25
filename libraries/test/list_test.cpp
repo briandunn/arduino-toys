@@ -1,10 +1,9 @@
 #include "gtest/gtest.h"
 #include "list.h"
-#include <iostream>
 
-TEST(ListTest, push) {
+TEST(ListTest, unshift) {
 		auto list = new List<int>();
-		list->push(1);
+		list->unshift(1);
 		auto i = list->begin();
 		ASSERT_EQ(i.value(), 1);
 		EXPECT_FALSE(i.end());
@@ -22,8 +21,8 @@ TEST(ListTest, iteratorIncrementOnEmptyList) {
 
 TEST(ListTest, iteratorIncrement) {
 		auto list = new List<int>();
-		list->push(1);
-		list->push(2);
+		list->unshift(1);
+		list->unshift(2);
 		auto i = list->begin();
 		ASSERT_EQ(i.value(), 2);
 		EXPECT_FALSE(i.end());
@@ -36,9 +35,9 @@ TEST(ListTest, iteratorIncrement) {
 
 TEST(ListTest, iteration) {
 		auto list = new List<int>();
-		list->push(1);
-		list->push(2);
-		list->push(3);
+		list->unshift(1);
+		list->unshift(2);
+		list->unshift(3);
 		int a[] = {0,0,0};
 		int j = 0;
 		for(auto i = list->begin(); i.more(); ++i)
@@ -50,9 +49,9 @@ TEST(ListTest, iteration) {
 
 TEST(ListTest, removeFromTheMiddle) {
 		auto list = new List<int>();
-		list->push(3);
-		list->push(2);
-		list->push(1);
+		list->unshift(3);
+		list->unshift(2);
+		list->unshift(1);
 		auto i = list->begin();
 		++i;
 		i.remove(); // remove the 2;
@@ -63,4 +62,25 @@ TEST(ListTest, removeFromTheMiddle) {
 		ASSERT_EQ(i.value(), 1);
 		++i;
 		ASSERT_EQ(i.value(), 3);
+}
+
+TEST(ListTest, removeFromFront) {
+		auto list = new List<int>();
+		list->unshift(3);
+		list->unshift(2);
+
+		auto i = list->begin();
+		i.remove();
+		ASSERT_EQ(i.value(), 3);
+}
+
+TEST(ListTest, removeLast) {
+		auto list = new List<int>();
+		list->unshift(3);
+		list->unshift(2);
+
+		auto i = list->begin();
+		++i;
+		i.remove();
+		ASSERT_EQ(i.value(), 2);
 }
