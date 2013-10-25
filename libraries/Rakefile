@@ -1,0 +1,27 @@
+require 'rake/loaders/makefile'
+import '../rakelib/gtest.rake'
+
+namespace :test do
+  test_sources = FileList['test/*_test.cpp']
+  includes = "-I../gtest/include -I."
+
+  test_sources.each do |source|
+    file source.ext('o') => source do |t|
+      sh "c++ #{source} #{includes} -Wno-c++11-extensions -c -o #{t.name}"
+    end
+  end
+
+  file '.depends.mf' => test_sources.to_a do |t|
+    sh "makedepend -Y -f- -- #{includes} -- #{test_sources} > #{t.name} 2> /dev/null"
+  end
+
+  import '.depends.mf'
+
+  file 'test/run' => test_sources.ext('o') do |t|
+    sh "c++ -o #{t.name} #{t.prerequisites.join ' '}"
+  end
+
+  task :clean do
+    FileUtils.rm_rf test_sources.ext('o').add 'test/run'
+  end
+end
