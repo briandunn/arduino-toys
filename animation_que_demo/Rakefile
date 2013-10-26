@@ -1,27 +1,11 @@
-load '../rakelib/arduino.rake'
-
-CXX_FLAGS << " -I ../libraries"
+import '../rakelib/arduino.rake'
 
 sources = FileList['demo.cpp', '../libraries/pin.cpp']
 sources.each do |source|
   file source.ext('o') => source do |t|
-    sh "avr-gcc -I ../libraries #{CXX_FLAGS} -c #{source} -o #{t.name}"
+    sh "avr-gcc -I ../libraries #$CXX_FLAGS -c #{source} -o #{t.name}"
   end
 end
 
-file 'demo.elf' => sources.ext('o') + [$arduino_lib] do |t|
-  sh "avr-gcc -Os -Wl,--gc-sections -L. -lm -mmcu=atmega328p -o #{t.name} #{t.prerequisites.join ' '}"
-end
-
-file 'demo.hex' => 'demo.elf' do |t|
-  sh "avr-objcopy -O ihex -R .eeprom #{t.prerequisites.first} #{t.name}"
-end
-
-task build: 'demo.hex'
+file 'main.hex' => sources.ext('o')
 task default: :build
-
-task upload: :build do |t|
-  port = Dir['/dev/tty.usbmodem*'].first or raise "plug the arduino in!"
-  sh "avrdude -v -v -pm328p -carduino -P #{port} -U flash:w:demo.hex:i"
-end
-

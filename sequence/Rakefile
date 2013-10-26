@@ -1,53 +1,34 @@
 require 'rake/loaders/makefile'
 import '../rakelib/gtest.rake'
-load '../rakelib/arduino.rake'
-build_path = Pathname "tmp"
-hex = build_path.join 'payload.hex'
-elf = build_path.join 'payload.elf'
-dot_o = ->(file) { build_path.join File.basename(file).gsub /\.[^\.]+$/, '.o' }
-directory build_path.to_s
+import '../rakelib/arduino.rake'
 
-CXX_FLAGS << " -I ../libraries"
-SOURCES = FileList['*.h', '*.cpp']
-file ".depends.mf" => SOURCES.to_a do |t|
-  sh "makedepend -Y -f- -ptmp/ -- #{CXX_FLAGS} -- #{SOURCES} > #{t.name} 2> /dev/null"
+($CXX_FLAGS ||= '') << " -I ../libraries"
+sources = FileList['*.cpp', '../libraries/poll_button.cpp', '../libraries/pin.cpp']
+file ".depends.mf" => sources.to_a do |t|
+  sh "makedepend -Y -f- -- #$CXX_FLAGS -- #{sources} > #{t.name}"
 end
 
 import ".depends.mf"
 
-sources = %w[sequence.cpp ../libraries/poll_button.cpp ../libraries/pin.cpp]
 sources.each do |source|
-  file dot_o[source] => [source, build_path] do |t|
-    sh "avr-gcc -I ../libraries #{CXX_FLAGS} -c #{source} -o #{t.name}"
+  file source.ext('o') => source do |t|
+    sh "avr-gcc -I ../libraries #$CXX_FLAGS -c #{source} -o #{t.name}"
   end
 end
 
-task(:clean) { FileUtils.rm_rf build_path }
+task(:clean) { FileUtils.rm_rf sources.ext('o').add 'main.hex', 'main.elf' }
 
-file elf => sources.map(&dot_o) + [$arduino_lib] do |t|
-  sh "avr-gcc -Os -Wl,--gc-sections -L. -lm -mmcu=atmega328p -o #{t.name} #{t.prerequisites.join ' '}"
-end
-
-file hex => elf do |t|
-  sh "avr-objcopy -O ihex -R .eeprom #{t.prerequisites.first} #{t.name}"
-end
-
-task build: hex
+file 'main.hex' => sources.ext('o')
 task default: :build
 
-task upload: :build do |t|
-  port = Dir['/dev/tty.usbmodem*'].first or raise "plug the arduino in!"
-  sh "avrdude -v -v -pm328p -carduino -P #{port} -U flash:w:#{hex}:i"
-end
-
 namespace :test do
-  sources = FileList['test/*_test.cpp']
+  test_sources = FileList['test/*_test.cpp']
   rule '.o' => '.cpp' do |t|
     sh "c++ -c -I ../gtest/include -I ../libraries -I. #{t.source} -o #{t.name}"
   end
 
-  file 'test/run' => sources.ext('o') do |t|
+  file 'test/run' => test_sources.ext('o') do |t|
     sh "c++ -o #{t.name} #{t.prerequisites.join ' '}"
   end
-  task(:clean) { FileUtils.rm_rf sources.ext('o').add 'test/run' }
+  task(:clean) { FileUtils.rm_rf test_sources.ext('o').add 'test/run' }
 end
