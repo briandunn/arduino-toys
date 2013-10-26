@@ -22,6 +22,6 @@ task default: :build
 
 task upload: :build do |t|
   port = Dir['/dev/tty.usbmodem*'].first or raise "plug the arduino in!"
-  sh "avrdude -v -v -pm328p -carduino -P #{port} -U flash:w:#{hex}:i"
+  sh "avrdude -v -v -pm328p -carduino -P #{port} -U flash:w:demo.hex:i"
 end
 

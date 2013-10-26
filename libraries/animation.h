@@ -18,7 +18,7 @@ class AnimationQueue {
 			list->unshift(animation);
 		}
 		static void loop() {
-			for(auto i = list->begin(); i.more(); ++i)
+			for(List<Animation*>::iterator i = list->begin(); i.more(); ++i)
 				i.value()->loop();
 		}
 
