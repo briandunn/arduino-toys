@@ -1,11 +1,15 @@
 require 'rake/loaders/makefile'
 import '../rakelib/gtest.rake'
 import '../rakelib/arduino.rake'
+require 'tempfile'
 
 ($CXX_FLAGS ||= '') << " -I ../libraries"
 sources = FileList['*.cpp', '../libraries/poll_button.cpp', '../libraries/pin.cpp']
 file ".depends.mf" => sources.to_a do |t|
-  sh "makedepend -Y -f- -- #$CXX_FLAGS -- #{sources} > #{t.name}"
+  Tempfile.open 'makedepend.err' do |err|
+    system "makedepend -Y -f- -- #$CXX_FLAGS -- #{sources} > #{t.name}", err: err
+    puts err.tap(&:rewind).read.split("\n").grep(/warning/).select { |line| !line.include? $arduino_path.to_s }
+  end
 end
 
 import ".depends.mf"

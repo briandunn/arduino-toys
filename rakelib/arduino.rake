@@ -1,15 +1,15 @@
 root = Pathname(__FILE__).dirname.join '..'
 build_path = root.join 'tmp/arduino'
-arduino_path = Pathname '/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino'
-core_path = arduino_path.join 'cores/arduino'
+$arduino_path = Pathname '/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino'
+core_path = $arduino_path.join 'cores/arduino'
 directory build_path.to_s
 arduino_lib = build_path.join 'core.a'
 
 ($CXX_FLAGS ||= '') << <<-FLAGS.gsub(/\s+/, ' ')
   -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections
   -mmcu=atmega328p -DF_CPU=16000000L -MMD -DUSB_VID=null -DUSB_PID=null
-  -DARDUINO=105 -I#{arduino_path.join 'cores/arduino'}
-  -I#{arduino_path.join 'variants/standard'}
+  -DARDUINO=105 -I#{$arduino_path.join 'cores/arduino'}
+  -I#{$arduino_path.join 'variants/standard'}
 FLAGS
 
 core_sources = FileList[*%w[WInterrupts.c wiring.c wiring_analog.c wiring_digital.c
