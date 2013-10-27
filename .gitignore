@@ -1,7 +1,9 @@
-**/*.gch
-**/a.out
-**/*.o
-**/*.a
-**/*.d
-**/*.hex
-**/*.elf
+*.gch
+*.o
+*.a
+*.d
+*.hex
+*.elf
+**/test/run
+cscope.out
+.depends.mf
