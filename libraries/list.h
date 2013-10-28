@@ -1,9 +1,10 @@
 template<typename T> class List {
 	class node {
 		public:
-			node(T item, node* next) : item(item), next(next) {}
-			T item;
-			node* next;
+		node(T item, node* previous, node* next) : item(item), previous(previous), next(next) {}
+		T item;
+		node* previous;
+		node* next;
 	};
 
 	node* first;
@@ -12,8 +13,8 @@ template<typename T> class List {
 	class iterator {
 		public:
 		node* current;
-		node* previous;
-		iterator(node* start) : current(start), previous(NULL) { }
+		List<T>* list;
+		iterator(List<T>* list, node* start) : list(list), current(start) { }
 
 		T value() {
 			return current->item;
@@ -21,21 +22,26 @@ template<typename T> class List {
 
 		iterator& operator++() {
 			if(more()) {
-				previous = current;
 				current = current->next;
 			}
 			return *this;
 		}
 
+		/* f -> x
+		 * f -> x <-> 0
+		 * f -> 0 <-> x
+		 * f -> 0 <-> x <-> 0
+		 */
 		void remove() {
 			node* tmp = current;
-			if(current->next != NULL) {
-				current = current->next;
-				if(previous != NULL)
-					previous->next = current;
-			} else {
-				current = previous;
-			}
+			if(tmp == list->first)
+				list->first = tmp->next;
+			if(tmp->next != NULL)
+				tmp->next->previous = tmp->previous;
+			if(tmp->previous != NULL)
+				tmp->previous->next = tmp->next;
+
+			current = tmp->next;
 			delete tmp;
 		}
 
@@ -47,10 +53,12 @@ template<typename T> class List {
 	List() : first(NULL) {}
 
 	void unshift(T item) {
-		first = new node(item, first);
+		node* newFirst = new node(item, NULL, first);
+		if(first != NULL) first->previous = newFirst;
+		first = newFirst;
 	}
 
 	iterator begin() {
-		return iterator(first);
+		return iterator(this, first);
 	}
 };

@@ -81,6 +81,25 @@ TEST(ListTest, removeLast) {
 
 		auto i = list->begin();
 		++i;
+		EXPECT_FALSE(i.end());
 		i.remove();
+		EXPECT_TRUE(i.end());
+}
+
+TEST(ListTest, addAfterRemove) {
+		auto list = new List<int>();
+		list->unshift(3);
+		list->unshift(2);
+
+		auto i = list->begin();
+		++i;
+		i.remove();
+		list->unshift(1);
+
+		i = list->begin();
+		ASSERT_EQ(i.value(), 1);
+		++i;
 		ASSERT_EQ(i.value(), 2);
+		++i;
+		EXPECT_TRUE(i.end());
 }
