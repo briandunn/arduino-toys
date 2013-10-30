@@ -26,3 +26,39 @@ TEST(AnimationQueueTest, acceptMultipleAnimationLoops) {
 	ASSERT_EQ(a->loopCalls, 1);
 	ASSERT_EQ(b->loopCalls, 1);
 }
+
+TEST(AnimationQueueTest, removesFinishedAnimations) {
+	FooAnimation* a = new FooAnimation();
+	AnimationQueue::add(a);
+	a->finished = true;
+	AnimationQueue::loop();
+	ASSERT_EQ(a->loopCalls, 0);
+}
+
+TEST(AnimationQueueTest, keepsRollingAfterRemoval) {
+	FooAnimation* a = new FooAnimation();
+	FooAnimation* b = new FooAnimation();
+	AnimationQueue::add(a);
+	a->finished = true;
+	AnimationQueue::loop();
+	ASSERT_EQ(a->loopCalls, 0);
+	AnimationQueue::add(b);
+	AnimationQueue::loop();
+	ASSERT_EQ(a->loopCalls, 0);
+	ASSERT_EQ(b->loopCalls, 1);
+}
+
+TEST(AnimationQueueTest, onlyAdvancesBlockingAnimations) {
+	FooAnimation* a = new FooAnimation();
+	FooAnimation* b = new FooAnimation();
+	AnimationQueue::add(a);
+	AnimationQueue::add(b);
+	b->blocking = true;
+	AnimationQueue::loop();
+	ASSERT_EQ(a->loopCalls, 1);
+	ASSERT_EQ(b->loopCalls, 1);
+	AnimationQueue::loop();
+	ASSERT_EQ(a->loopCalls, 1);
+	ASSERT_EQ(b->loopCalls, 2);
+
+}
