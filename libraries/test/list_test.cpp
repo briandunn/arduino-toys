@@ -116,3 +116,12 @@ TEST(ListTest, push) {
 		++i;
 		EXPECT_TRUE(i.end());
 }
+
+TEST(ListTest, clear) {
+		auto list = new List<int>();
+		list->push(1);
+		ASSERT_EQ(list->length(), 1);
+		list->clear();
+		ASSERT_EQ(list->length(), 0);
+		EXPECT_TRUE(list->begin().end());
+}
