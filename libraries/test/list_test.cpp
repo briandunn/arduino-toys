@@ -5,6 +5,7 @@ TEST(ListTest, unshift) {
 		auto list = new List<int>();
 		list->unshift(1);
 		auto i = list->begin();
+		EXPECT_TRUE(i.last());
 		ASSERT_EQ(i.value(), 1);
 		EXPECT_FALSE(i.end());
 		++i;

@@ -1,0 +1,86 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+Animation	/Users/brian/Documents/Arduino/libraries/animation.h	/^		Animation() : finished(false) {}$/;"	f	class:Animation
+Animation	/Users/brian/Documents/Arduino/libraries/animation.h	/^class Animation {$/;"	c
+AnimationItem	/Users/brian/Documents/Arduino/libraries/animation.h	/^		AnimationItem(Animation* animation): animation(animation) {}$/;"	f	class:AnimationItem
+AnimationItem	/Users/brian/Documents/Arduino/libraries/animation.h	/^class AnimationItem {$/;"	c
+AnimationQueue	/Users/brian/Documents/Arduino/libraries/animation.h	/^class AnimationQueue {$/;"	c
+Button	/Users/brian/Documents/Arduino/libraries/button.h	/^class Button {$/;"	c
+FooAnimation	/Users/brian/Documents/Arduino/libraries/test/animation_test.cpp	/^		FooAnimation() : loopCalls(0) {}$/;"	f	class:FooAnimation
+FooAnimation	/Users/brian/Documents/Arduino/libraries/test/animation_test.cpp	/^class FooAnimation : public Animation {$/;"	c	file:
+InterruptButton	/Users/brian/Documents/Arduino/libraries/interrupt_button.cpp	/^InterruptButton::InterruptButton(int num) {$/;"	f	class:InterruptButton
+InterruptButton	/Users/brian/Documents/Arduino/libraries/interrupt_button.h	/^class InterruptButton : public Button {$/;"	c
+List	/Users/brian/Documents/Arduino/libraries/list.h	/^	List() : first(NULL) {}$/;"	f	class:List
+List	/Users/brian/Documents/Arduino/libraries/list.h	/^template<typename T> class List {$/;"	c
+Pin	/Users/brian/Documents/Arduino/libraries/pin.cpp	/^Pin::Pin(int num, int mode) {$/;"	f	class:Pin
+Pin	/Users/brian/Documents/Arduino/libraries/pin.h	/^class Pin {$/;"	c
+Pin	/Users/brian/Documents/Arduino/libraries/test/test_pin.h	/^Pin::Pin(int p, int m) { }$/;"	f	class:Pin
+PollButton	/Users/brian/Documents/Arduino/libraries/poll_button.cpp	/^PollButton::PollButton(Pin* pin) {$/;"	f	class:PollButton
+PollButton	/Users/brian/Documents/Arduino/libraries/poll_button.h	/^class PollButton : public Button {$/;"	c
+TEST	/Users/brian/Documents/Arduino/libraries/test/animation_test.cpp	/^TEST(AnimationQueueTest, acceptMultipleAnimationLoops) {$/;"	f
+TEST	/Users/brian/Documents/Arduino/libraries/test/animation_test.cpp	/^TEST(AnimationQueueTest, loopCallsAnimationLoops) {$/;"	f
+TEST	/Users/brian/Documents/Arduino/libraries/test/animation_test.cpp	/^TEST(AnimationQueueTest, removesFinishedAnimations) {$/;"	f
+TEST	/Users/brian/Documents/Arduino/libraries/test/list_test.cpp	/^TEST(ListTest, iteration) {$/;"	f
+TEST	/Users/brian/Documents/Arduino/libraries/test/list_test.cpp	/^TEST(ListTest, iteratorIncrement) {$/;"	f
+TEST	/Users/brian/Documents/Arduino/libraries/test/list_test.cpp	/^TEST(ListTest, iteratorIncrementOnEmptyList) {$/;"	f
+TEST	/Users/brian/Documents/Arduino/libraries/test/list_test.cpp	/^TEST(ListTest, removeFromFront) {$/;"	f
+TEST	/Users/brian/Documents/Arduino/libraries/test/list_test.cpp	/^TEST(ListTest, removeFromTheMiddle) {$/;"	f
+TEST	/Users/brian/Documents/Arduino/libraries/test/list_test.cpp	/^TEST(ListTest, removeLast) {$/;"	f
+TEST	/Users/brian/Documents/Arduino/libraries/test/list_test.cpp	/^TEST(ListTest, unshift) {$/;"	f
+_pin_h_	/Users/brian/Documents/Arduino/libraries/pin.h	/^#define _pin_h_$/;"	d
+add	/Users/brian/Documents/Arduino/libraries/animation.h	/^		static void add(Animation * animation) {$/;"	f	class:AnimationQueue
+analogWrite	/Users/brian/Documents/Arduino/libraries/pin.cpp	/^void Pin::analogWrite(int val)  { ::analogWrite(num, val); }$/;"	f	class:Pin
+analogWrite	/Users/brian/Documents/Arduino/libraries/test/test_pin.h	/^Pin::analogWrite(int) {$/;"	f	class:Pin
+animation	/Users/brian/Documents/Arduino/libraries/animation.h	/^	Animation* animation;$/;"	m	class:AnimationItem
+begin	/Users/brian/Documents/Arduino/libraries/list.h	/^	iterator begin() {$/;"	f	class:List
+button_h	/Users/brian/Documents/Arduino/libraries/button.h	/^#define button_h$/;"	d
+change0	/Users/brian/Documents/Arduino/libraries/interrupt_button.cpp	/^InterruptButton::change0() {$/;"	f	class:InterruptButton
+change1	/Users/brian/Documents/Arduino/libraries/interrupt_button.cpp	/^InterruptButton::change1() {$/;"	f	class:InterruptButton
+changed	/Users/brian/Documents/Arduino/libraries/interrupt_button.cpp	/^bool changed(int value) {$/;"	f
+changes	/Users/brian/Documents/Arduino/libraries/interrupt_button.cpp	/^InterruptButton::changes[] = {0, 0};$/;"	m	class:InterruptButton	file:
+changes	/Users/brian/Documents/Arduino/libraries/interrupt_button.h	/^		static volatile int changes[2];$/;"	m	class:InterruptButton
+current	/Users/brian/Documents/Arduino/libraries/list.h	/^		node* current;$/;"	m	class:List::iterator
+digitalRead	/Users/brian/Documents/Arduino/libraries/pin.cpp	/^int  Pin::digitalRead()         { return ::digitalRead(num); }$/;"	f	class:Pin
+digitalRead	/Users/brian/Documents/Arduino/libraries/test/test_pin.h	/^Pin::digitalRead() {$/;"	f	class:Pin
+digitalWrite	/Users/brian/Documents/Arduino/libraries/pin.cpp	/^void Pin::digitalWrite(int val) { ::digitalWrite(num, val); }$/;"	f	class:Pin
+digitalWrite	/Users/brian/Documents/Arduino/libraries/test/test_pin.h	/^Pin::digitalWrite(int val) {$/;"	f	class:Pin
+end	/Users/brian/Documents/Arduino/libraries/list.h	/^		bool end() { return current == NULL; }$/;"	f	class:List::iterator
+finished	/Users/brian/Documents/Arduino/libraries/animation.h	/^		bool finished;$/;"	m	class:Animation
+first	/Users/brian/Documents/Arduino/libraries/list.h	/^	node* first;$/;"	m	class:List
+interruptNumber	/Users/brian/Documents/Arduino/libraries/interrupt_button.h	/^		int interruptNumber;$/;"	m	class:InterruptButton
+isDown	/Users/brian/Documents/Arduino/libraries/interrupt_button.cpp	/^bool isDown(int changeNumber) { return changeNumber % 2 == 0; }$/;"	f
+isPressed	/Users/brian/Documents/Arduino/libraries/poll_button.cpp	/^bool PollButton::isPressed() {$/;"	f	class:PollButton
+item	/Users/brian/Documents/Arduino/libraries/list.h	/^			T item;$/;"	m	class:List::node
+iterator	/Users/brian/Documents/Arduino/libraries/list.h	/^		iterator(node* start) : current(start), previous(NULL) { }$/;"	f	class:List::iterator
+iterator	/Users/brian/Documents/Arduino/libraries/list.h	/^	class iterator {$/;"	c	class:List
+list	/Users/brian/Documents/Arduino/libraries/animation.h	/^		static List<Animation*>* list;$/;"	m	class:AnimationQueue
+list	/Users/brian/Documents/Arduino/libraries/animation.h	/^List<Animation*>* AnimationQueue::list = new List<Animation*>();$/;"	m	class:AnimationQueue
+loop	/Users/brian/Documents/Arduino/libraries/animation.h	/^		static void loop() {$/;"	f	class:AnimationQueue
+loop	/Users/brian/Documents/Arduino/libraries/test/animation_test.cpp	/^		void loop() { loopCalls ++; }$/;"	f	class:FooAnimation
+loopCalls	/Users/brian/Documents/Arduino/libraries/test/animation_test.cpp	/^		int loopCalls;$/;"	m	class:FooAnimation	file:
+more	/Users/brian/Documents/Arduino/libraries/list.h	/^		bool more() { return !end(); }$/;"	f	class:List::iterator
+next	/Users/brian/Documents/Arduino/libraries/animation.h	/^		AnimationItem* next;$/;"	m	class:AnimationItem
+next	/Users/brian/Documents/Arduino/libraries/list.h	/^			node* next;$/;"	m	class:List::node
+noTone	/Users/brian/Documents/Arduino/libraries/pin.cpp	/^void Pin::noTone()              { ::noTone(num); }$/;"	f	class:Pin
+noTone	/Users/brian/Documents/Arduino/libraries/test/test_pin.h	/^Pin::noTone() {$/;"	f	class:Pin
+node	/Users/brian/Documents/Arduino/libraries/list.h	/^			node(T item, node* next) : item(item), next(next) {}$/;"	f	class:List::node
+node	/Users/brian/Documents/Arduino/libraries/list.h	/^	class node {$/;"	c	class:List
+num	/Users/brian/Documents/Arduino/libraries/pin.h	/^	int num;$/;"	m	class:Pin
+operator ++	/Users/brian/Documents/Arduino/libraries/list.h	/^		iterator& operator++() {$/;"	f	class:List::iterator
+pin	/Users/brian/Documents/Arduino/libraries/poll_button.h	/^	Pin* pin;$/;"	m	class:PollButton
+previous	/Users/brian/Documents/Arduino/libraries/list.h	/^		node* previous;$/;"	m	class:List::iterator
+remove	/Users/brian/Documents/Arduino/libraries/list.h	/^		void remove() {$/;"	f	class:List::iterator
+reportedChanges	/Users/brian/Documents/Arduino/libraries/interrupt_button.h	/^		int reportedChanges;$/;"	m	class:InterruptButton
+tone	/Users/brian/Documents/Arduino/libraries/pin.cpp	/^void Pin::tone(int val)         { ::tone(num, val); }$/;"	f	class:Pin
+tone	/Users/brian/Documents/Arduino/libraries/pin.cpp	/^void Pin::tone(int val, int dur){ ::tone(num, val, dur); }$/;"	f	class:Pin
+tone	/Users/brian/Documents/Arduino/libraries/test/test_pin.h	/^Pin::tone(int val) {$/;"	f	class:Pin
+tone	/Users/brian/Documents/Arduino/libraries/test/test_pin.h	/^Pin::tone(int val, int dur) {$/;"	f	class:Pin
+unshift	/Users/brian/Documents/Arduino/libraries/list.h	/^	void unshift(T item) {$/;"	f	class:List
+value	/Users/brian/Documents/Arduino/libraries/list.h	/^		T value() {$/;"	f	class:List::iterator
+wasPressed	/Users/brian/Documents/Arduino/libraries/interrupt_button.cpp	/^InterruptButton::wasPressed() {$/;"	f	class:InterruptButton
+wasPressed	/Users/brian/Documents/Arduino/libraries/poll_button.cpp	/^bool PollButton::wasPressed() {$/;"	f	class:PollButton
+wasUp	/Users/brian/Documents/Arduino/libraries/poll_button.h	/^	bool wasUp;$/;"	m	class:PollButton

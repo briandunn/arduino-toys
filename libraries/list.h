@@ -48,6 +48,8 @@ template<typename T> class List {
 
 		bool more() { return !end(); }
 
+		bool last() { return !end() && current->next == NULL; }
+
 		bool end() { return current == NULL; }
 	};
 
