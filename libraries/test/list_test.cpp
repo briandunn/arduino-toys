@@ -124,4 +124,11 @@ TEST(ListTest, clear) {
 		list->clear();
 		ASSERT_EQ(list->length(), 0);
 		EXPECT_TRUE(list->begin().end());
+
+		list->push(1);
+		list->push(1);
+		ASSERT_EQ(list->length(), 2);
+		list->clear();
+		ASSERT_EQ(list->length(), 0);
+		EXPECT_TRUE(list->begin().end());
 }

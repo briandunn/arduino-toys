@@ -22,13 +22,16 @@ class AnimationQueue {
 			list->push(animation);
 		}
 		static void loop() {
-			if(blocker != NULL)
+			if(blocker != NULL) {
 				if(blocker->finished)
 					blocker = NULL;
 				else
 					blocker->loop();
-			else
-				for(List<Animation*>::iterator i = list->begin(); i.more(); ++i) {
+			}
+
+			if(blocker == NULL) {
+				List<Animation*>::iterator i = list->begin();
+				while(i.more()) {
 					Animation* animation = i.value();
 					if(animation->finished) {
 						i.remove();
@@ -39,8 +42,17 @@ class AnimationQueue {
 							blocker = animation;
 							break; // exit the loop, skipping the rest of the queue.
 						}
+						++i;
 					}
 				}
+			}
+		}
+		static int length() {
+			return list->length();
+		}
+		static void clear() {
+			list->clear();
+			blocker = NULL;
 		}
 
 	private:
