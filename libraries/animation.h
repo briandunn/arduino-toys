@@ -5,6 +5,7 @@ class Animation {
 		bool finished;
 		bool blocking;
 		virtual void loop() = 0;
+		virtual ~Animation() {}
 };
 
 class AnimationItem {
