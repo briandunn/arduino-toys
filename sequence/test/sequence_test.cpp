@@ -6,11 +6,12 @@ int random(int range) { return 1; }
 class GameTest : public testing::Test {
   protected:
   virtual void SetUp() {
-    step = new Step(RED);
-    game = new Game(step);
+    steps = new List<Color>();
+    steps->push(RED);
+    game = new Game(steps);
   }
 
-  Step* step;
+  List<Color>* steps;
   Game* game;
 };
 
@@ -21,7 +22,7 @@ TEST_F(GameTest, noPress) {
 
   // the correct button has been pressed but the sequence is incomplete
 TEST_F(GameTest, incomplete) {
-  step->next = new Step(RED);
+  steps->push(RED);
   ASSERT_EQ(game->record(RED), PLAYING);
 }
 
@@ -37,8 +38,8 @@ TEST_F(GameTest, incorrect) {
 
   // sequential presses
 TEST_F(GameTest, sequentialPresses) {
-  step->next = new Step(YELLOW);
-  step->next->next = new Step(RED);
+  steps->push(YELLOW);
+  steps->push(RED);
 
   ASSERT_EQ(game->record(RED), PLAYING);
   ASSERT_EQ(game->record(YELLOW), PLAYING);

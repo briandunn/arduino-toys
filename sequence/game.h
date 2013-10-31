@@ -1,48 +1,23 @@
+#include "list.h"
 enum Color { RED, YELLOW, NONE };
 enum GameStatus {PLAYING, GAME_OVER, BEAT_LEVEL};
 
-class Step {
-  public:
-    Step(Color color) :next(NULL), color(color) { }
-    Step* next;
-    Color color;
-    Step* increment() {
-      Step* step = new Step(randomColor());
-      Step* current = this;
-      while(current->next != NULL)
-        current = current->next;
-      current->next = step;
-      return step;
-    }
-    static Step* first() {
-      if(_first == NULL)
-        _first = new Step(randomColor());
-      return _first;
-    }
-  private:
-    static Step* _first;
-    static Color randomColor() {
-      return random(2) == 0 ? RED : YELLOW;
-    }
-};
-
-Step* Step::_first = NULL;
 class Game {
   public:
-    Game(Step* first): first(first), level(1), current(first), status(PLAYING) { }
+    Game(List<Color>* sequence): sequence(sequence), level(1), current(sequence->begin()), status(PLAYING) { }
 
-    Step* first;
+    List<Color>* sequence;
 
     GameStatus record(Color color) {
       GameStatus status = PLAYING;
       if(color == NONE) return status;
-      if(color == current->color) {
-        if(current->next == NULL) {
-          current->increment();
-          current = first;
+      if(color == current.value()) {
+        if(current.last()) {
+          sequence->push(random(2) == 0 ? RED : YELLOW);
+          current = sequence->begin();
           status = BEAT_LEVEL;
           level++;
-        } else current = current->next;
+        } else ++current;
       } else status = GAME_OVER;
       return status;
     }
@@ -50,6 +25,6 @@ class Game {
     int level;
 
   private:
-    Step* current;
+    List<Color>::iterator current;
     GameStatus status;
 };

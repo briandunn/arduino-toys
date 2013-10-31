@@ -140,14 +140,9 @@ Color getPress() {
 Move* red;
 Move* yellow;
 
-void playSequence(Step* step) {
-  Step* current = step;
-  while(current != NULL) {
-    Move* move;
-    move = current->color == YELLOW ? yellow : red;
-    move->indicate();
-    current = current->next;
-  }
+void playSequence(List<Color> * sequence) {
+  for(List<Color>::iterator i = sequence->begin(); i.more(); ++i)
+    (i.value() == YELLOW ? yellow : red)->indicate();
 }
 
 void setup() {
@@ -158,8 +153,10 @@ void setup() {
   yellow       = new Yellow(yellowLamp, piezo);
   redButton    = new IndicatingButton(red,    2);
   yellowButton = new IndicatingButton(yellow, 3);
-  game         = new Game(Step::first());
-  playSequence(game->first);
+  List<Color>* sequence = new List<Color>();
+  sequence->push(YELLOW);
+  game         = new Game(sequence);
+  playSequence(sequence);
 }
 
 
@@ -171,7 +168,7 @@ void loop() {
       break;
     case BEAT_LEVEL:
       beatLevel();
-      playSequence(game->first);
+      playSequence(game->sequence);
       break;
     case PLAYING:
       break;
