@@ -27,9 +27,18 @@ task default: :build
 
 namespace :test do
   test_sources = FileList['test/*_test.cpp']
-  rule '.o' => '.cpp' do |t|
-    sh "c++ -c -I ../gtest/include -I ../libraries -I. #{t.source} -o #{t.name}"
+  includes = "-I../gtest/include -I. -I../libraries"
+  test_sources.each do |source|
+    file source.ext('o') => source do |t|
+      sh "c++ #{source} #{includes} -Wno-c++11-extensions -c -o #{t.name}"
+    end
   end
+
+  file '.test.depends.mf' => test_sources.to_a do |t|
+    sh "makedepend -Y -f- -- #{includes} -- #{test_sources} > #{t.name} 2> /dev/null"
+  end
+
+  import '.test.depends.mf'
 
   file 'test/run' => test_sources.ext('o') do |t|
     sh "c++ -o #{t.name} #{t.prerequisites.join ' '}"
