@@ -1,6 +1,7 @@
 #include "pin.h"
 #include "Arduino.h"
 #include "poll_button.h"
+#include "animation.h"
 #include "game.h"
 
 enum Pitch {
@@ -24,37 +25,72 @@ class Move {
     Move(Pin* lamp): lamp(lamp) {}
     Color color;
 
-  Move* indicate() {
-    song();
-    for(int i = 1; i < 255; i++) {
-      lamp->analogWrite(i);
-      delay(1);
-    }
-    lamp->digitalWrite(LOW);
-    return this;
-  }
-
+  virtual Move* indicate(bool) = 0;
   protected:
-    virtual void song() = 0;
-
-  private:
     Pin* lamp;
+};
+
+class MoveAnimation : public Animation {
+  Pin* lamp;
+  Pin* piezo;
+  int brightness;
+  Pitch pitch;
+  unsigned long lastLoop;
+  unsigned long start;
+  bool started;
+  void frame(unsigned long elapsedSinceLoop, unsigned long elapsedSinceStart) {
+    if(elapsedSinceStart == 0) piezo->tone(pitch);
+    if(elapsedSinceStart < 200) {
+      // fade to 255 in 200 ms
+      lamp->analogWrite(elapsedSinceStart * 0.784);
+      brightness ++;
+    } else {
+      piezo->noTone();
+      lamp->digitalWrite(LOW);
+      finished = true;
+    }
+  }
+  public:
+  MoveAnimation(Pin* lamp, Pin* piezo, Pitch pitch) :
+    lamp(lamp), piezo(piezo), brightness(0), pitch(pitch), start(0), started(false) {
+    blocking = true;
+  }
+  void loop() {
+    if(!started) {
+      started = true;
+      start = millis();
+      lastLoop = start;
+    }
+    unsigned long time = millis();
+    frame(time - lastLoop, time - start);
+    lastLoop = time;
+  }
 };
 
 class Red : public Move {
   public:
     Red(Pin* lamp, Pin* piezo) : Move(lamp), piezo(piezo) { color = RED; }
+    Red* indicate(bool blocking) {
+      MoveAnimation* a = new MoveAnimation(lamp, piezo, A);
+      a->blocking = blocking;
+      AnimationQueue::add(a);
+      return this;
+    }
   private:
     Pin* piezo;
-    void song() { piezo->tone(A, 100); }
 };
 
 class Yellow : public Move {
   public:
     Yellow(Pin* lamp, Pin* piezo) : Move(lamp), piezo(piezo) { color = YELLOW; }
+    Yellow* indicate(bool blocking) {
+      MoveAnimation* a = new MoveAnimation(lamp, piezo, E);
+      a->blocking = blocking;
+      AnimationQueue::add(a);
+      return this;
+    }
   private:
     Pin* piezo;
-    void song() { piezo->tone(E, 100); }
 };
 
 class IndicatingButton : public PollButton {
@@ -63,7 +99,7 @@ class IndicatingButton : public PollButton {
 
   bool wasPressed() {
     bool was = PollButton::wasPressed();
-    if(was) move->indicate();
+    if(was) move->indicate(false);
     return was;
   }
 
@@ -142,7 +178,7 @@ Move* yellow;
 
 void playSequence(List<Color> * sequence) {
   for(List<Color>::iterator i = sequence->begin(); i.more(); ++i)
-    (i.value() == YELLOW ? yellow : red)->indicate();
+    (i.value() == YELLOW ? yellow : red)->indicate(true);
 }
 
 void setup() {
@@ -161,6 +197,7 @@ void setup() {
 
 
 void loop() {
+  AnimationQueue::loop();
   switch(game->record(getPress())) {
     case GAME_OVER:
       gameOver();
