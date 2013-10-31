@@ -79,10 +79,7 @@ template<typename T> class List {
 
 	void clear() {
 		iterator i = begin();
-		while(i.more()) {
-			i.remove();
-			++i;
-		}
+		while(i.more()) { i.remove(); }
 	}
 
 	iterator begin() {

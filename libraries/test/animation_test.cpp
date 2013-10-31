@@ -8,7 +8,13 @@ class FooAnimation : public Animation {
 		int loopCalls;
 };
 
-TEST(AnimationQueueTest, loopCallsAnimationLoops) {
+class AnimationQueueTest : public testing::Test {
+	virtual void SetUp() {
+		AnimationQueue::clear();
+	}
+};
+
+TEST_F(AnimationQueueTest, loopCallsAnimationLoops) {
 	FooAnimation* animation = new FooAnimation();
 	AnimationQueue::add(animation);
 	AnimationQueue::loop();
@@ -17,7 +23,7 @@ TEST(AnimationQueueTest, loopCallsAnimationLoops) {
 	ASSERT_EQ(animation->loopCalls, 2);
 }
 
-TEST(AnimationQueueTest, acceptMultipleAnimationLoops) {
+TEST_F(AnimationQueueTest, acceptMultipleAnimationLoops) {
 	FooAnimation* a = new FooAnimation();
 	FooAnimation* b = new FooAnimation();
 	AnimationQueue::add(a);
@@ -27,7 +33,7 @@ TEST(AnimationQueueTest, acceptMultipleAnimationLoops) {
 	ASSERT_EQ(b->loopCalls, 1);
 }
 
-TEST(AnimationQueueTest, removesFinishedAnimations) {
+TEST_F(AnimationQueueTest, removesFinishedAnimations) {
 	FooAnimation* a = new FooAnimation();
 	AnimationQueue::add(a);
 	a->finished = true;
@@ -35,7 +41,7 @@ TEST(AnimationQueueTest, removesFinishedAnimations) {
 	ASSERT_EQ(a->loopCalls, 0);
 }
 
-TEST(AnimationQueueTest, keepsRollingAfterRemoval) {
+TEST_F(AnimationQueueTest, keepsRollingAfterRemoval) {
 	FooAnimation* a = new FooAnimation();
 	FooAnimation* b = new FooAnimation();
 	AnimationQueue::add(a);
@@ -48,7 +54,7 @@ TEST(AnimationQueueTest, keepsRollingAfterRemoval) {
 	ASSERT_EQ(b->loopCalls, 1);
 }
 
-TEST(AnimationQueueTest, onlyAdvancesBlockingAnimations) {
+TEST_F(AnimationQueueTest, onlyAdvancesBlockingAnimations) {
 	FooAnimation* a = new FooAnimation();
 	FooAnimation* b = new FooAnimation();
 	AnimationQueue::add(a);
@@ -60,5 +66,23 @@ TEST(AnimationQueueTest, onlyAdvancesBlockingAnimations) {
 	AnimationQueue::loop();
 	ASSERT_EQ(a->loopCalls, 1);
 	ASSERT_EQ(b->loopCalls, 2);
+}
 
+TEST_F(AnimationQueueTest, removesBlockersAndCariesOn) {
+	FooAnimation* a = new FooAnimation();
+	FooAnimation* b = new FooAnimation();
+	AnimationQueue::add(a);
+	AnimationQueue::add(b);
+	ASSERT_EQ(2, AnimationQueue::length());
+	b->blocking = true;
+	AnimationQueue::loop();
+	ASSERT_EQ(a->loopCalls, 1);
+	ASSERT_EQ(b->loopCalls, 1);
+	AnimationQueue::loop();
+	ASSERT_EQ(a->loopCalls, 1);
+	ASSERT_EQ(b->loopCalls, 2);
+	b->finished = true;
+	AnimationQueue::loop();
+	ASSERT_EQ(a->loopCalls, 2);
+	ASSERT_EQ(b->loopCalls, 2);
 }
