@@ -3,7 +3,7 @@ import '../rakelib/arduino.rake'
 sources = FileList['demo.cpp', '../libraries/pin.cpp']
 sources.each do |source|
   file source.ext('o') => source do |t|
-    sh "avr-gcc -I ../libraries #$CXX_FLAGS -c #{source} -o #{t.name}"
+    sh "#$gcc -I ../libraries #$CXX_FLAGS -c #{source} -o #{t.name}"
   end
 end
 
