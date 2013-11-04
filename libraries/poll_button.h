@@ -5,8 +5,8 @@ class PollButton : public Button {
 public:
 	PollButton(Pin*);
 	bool wasPressed();
-	bool isPressed();
 private:
 	Pin* pin;
-	bool wasUp;
+	int val;
+	unsigned long lastAt;
 };
